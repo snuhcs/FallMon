@@ -13,7 +13,9 @@
 #### application
 
 어플리케이션은 이 branch를 basic으로 생각해주십시오
+<br>
 어플리케이션 개발하시는 분은 이 branch에서 새로운 branch를 생성,
+<br>
 이 branch로 최종 merge/pull request 해주시기 바랍니다.
 
 application_base로 합하는데 폴더를 따로 하는 방법을 찾고 싶은 상태
