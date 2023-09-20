@@ -28,24 +28,36 @@ import com.example.fallmon.R
 import com.example.fallmon.presentation.theme.FallMonTheme
 
 class MainActivity : ComponentActivity(), SensorEventListener {
+
+    private val SAMPLING_RATE: Int = 30
+    private val WINDOW_SIZE: Int = 75
+    private val WINDOW_STRIDE: Int = 15
+
     private lateinit var sensorManager: SensorManager
     private var mAccelerometer: Sensor ?= null
     private lateinit var text_square: TextView
+
+    // sensor_window, window_index : for sliding window
+    private var sensor_window = Array(75, {Array<Float>(3, {0.0f})})
+    private var window_index: Int = 0
+
+    /* Constructor */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         text_square = findViewById(R.id.text_view1)
         setUpSensor()
     }
+
+    /* Set up sensor when the app starts */
     private fun setUpSensor(){
         sensorManager = getSystemService(android.content.Context.SENSOR_SERVICE) as android.hardware.SensorManager
         mAccelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)?.also{
             sensorManager.registerListener(
                 this,
                 it,
-                SensorManager.
-                SENSOR_DELAY_FASTEST,
-                SensorManager.SENSOR_DELAY_FASTEST
+                1000000 / SAMPLING_RATE,
+                1000000 / SAMPLING_RATE
             )
         }
     }
@@ -56,8 +68,19 @@ class MainActivity : ComponentActivity(), SensorEventListener {
             val xAcceleration = event.values[0]
             val yAcceleration = event.values[1]
             val zAcceleration = event.values[2]
-            text_square.text = "x: ${xAcceleration}  y:  ${yAcceleration}  z: ${zAcceleration}"
+            text_square.text = "${window_index}  \nx: ${xAcceleration}  \ny:  ${yAcceleration}  \nz: ${zAcceleration}"
+
+            sensor_window[window_index % WINDOW_SIZE][0] = xAcceleration
+            sensor_window[window_index % WINDOW_SIZE][1] = yAcceleration
+            sensor_window[window_index % WINDOW_SIZE][2] = zAcceleration
+            window_index += 1
+
+            if(window_index % WINDOW_SIZE == 0) sensorWindowFulled()
         }
+    }
+
+    private fun sensorWindowFulled() {
+        text_square.text = "sensorWindowFulled"
     }
 
     override fun onAccuracyChanged(p0: Sensor?, p1: Int) {
