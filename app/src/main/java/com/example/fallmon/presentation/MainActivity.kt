@@ -26,6 +26,8 @@ import androidx.wear.compose.material.MaterialTheme
 import androidx.wear.compose.material.Text
 import com.example.fallmon.R
 import com.example.fallmon.presentation.theme.FallMonTheme
+import kotlin.math.abs
+import kotlin.math.sqrt
 
 class MainActivity : ComponentActivity(), SensorEventListener {
 
@@ -39,6 +41,7 @@ class MainActivity : ComponentActivity(), SensorEventListener {
 
     // sensor_window, window_index : for sliding window
     private var sensor_window = Array(75, {Array<Float>(3, {0.0f})})
+    private var sensor_window_transpose = Array(3, {Array<Float>(75, {0.0f})})
     private var window_index: Int = 0
 
     /* Constructor */
@@ -68,19 +71,39 @@ class MainActivity : ComponentActivity(), SensorEventListener {
             val xAcceleration = event.values[0]
             val yAcceleration = event.values[1]
             val zAcceleration = event.values[2]
-            text_square.text = "${window_index}  \nx: ${xAcceleration}  \ny:  ${yAcceleration}  \nz: ${zAcceleration}"
+            //text_square.text = "${window_index}  \nx: ${xAcceleration}  \ny:  ${yAcceleration}  \nz: ${zAcceleration}"
 
             sensor_window[window_index % WINDOW_SIZE][0] = xAcceleration
             sensor_window[window_index % WINDOW_SIZE][1] = yAcceleration
             sensor_window[window_index % WINDOW_SIZE][2] = zAcceleration
+
+            // for easy calculate features. Erase this if has efficient way
+            sensor_window_transpose[0][window_index % WINDOW_SIZE] = xAcceleration
+            sensor_window_transpose[1][window_index % WINDOW_SIZE] = yAcceleration
+            sensor_window_transpose[2][window_index % WINDOW_SIZE] = zAcceleration
+
             window_index += 1
 
-            if(window_index % WINDOW_SIZE == 0) sensorWindowFulled()
+            if(window_index % WINDOW_STRIDE == 0 && window_index >= WINDOW_SIZE) {
+                sensorWindowFulled()
+            }
         }
     }
 
     private fun sensorWindowFulled() {
-        text_square.text = "sensorWindowFulled"
+        var xAverage = sensor_window_transpose[0].average().toFloat()
+        var yAverage = sensor_window_transpose[1].average().toFloat()
+        var zAverage = sensor_window_transpose[2].average().toFloat()
+        var xStandardDeviation = standardDeviation(sensor_window_transpose[0], xAverage)
+        var yStandardDeviation = standardDeviation(sensor_window_transpose[1], yAverage)
+        var zStandardDeviation = standardDeviation(sensor_window_transpose[2], zAverage)
+        text_square.text = "${window_index}  \nx: ${xAverage}, ${xStandardDeviation} \ny: ${yAverage}, ${yStandardDeviation} \nz: ${zAverage}, ${zStandardDeviation} \n"
+    }
+
+    private fun standardDeviation(array: Array<Float>, average: Float): Float {
+        var variance: Float = 0.0f
+        for(f in array) variance += abs(f - average)
+        return sqrt(variance)
     }
 
     override fun onAccuracyChanged(p0: Sensor?, p1: Int) {
