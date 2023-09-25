@@ -26,8 +26,12 @@ import androidx.wear.compose.material.MaterialTheme
 import androidx.wear.compose.material.Text
 import com.example.fallmon.R
 import com.example.fallmon.presentation.theme.FallMonTheme
+
 import kotlin.math.abs
+import kotlin.math.max
+import kotlin.math.min
 import kotlin.math.sqrt
+
 
 class MainActivity : ComponentActivity(), SensorEventListener {
 
@@ -91,19 +95,56 @@ class MainActivity : ComponentActivity(), SensorEventListener {
     }
 
     private fun sensorWindowFulled() {
+
         var xAverage = sensor_window_transpose[0].average().toFloat()
         var yAverage = sensor_window_transpose[1].average().toFloat()
         var zAverage = sensor_window_transpose[2].average().toFloat()
+
         var xStandardDeviation = standardDeviation(sensor_window_transpose[0], xAverage)
         var yStandardDeviation = standardDeviation(sensor_window_transpose[1], yAverage)
         var zStandardDeviation = standardDeviation(sensor_window_transpose[2], zAverage)
-        text_square.text = "${window_index}  \nx: ${xAverage}, ${xStandardDeviation} \ny: ${yAverage}, ${yStandardDeviation} \nz: ${zAverage}, ${zStandardDeviation} \n"
+
+        var xRootMeanSquare = rootMeanSquare(sensor_window_transpose[0])
+        var yRootMeanSquare = rootMeanSquare(sensor_window_transpose[1])
+        var zRootMeanSquare = rootMeanSquare(sensor_window_transpose[2])
+
+        var xMaxAmplitude = maxAmplitude(sensor_window_transpose[0])
+        var yMaxAmplitude = maxAmplitude(sensor_window_transpose[1])
+        var zMaxAmplitude = maxAmplitude(sensor_window_transpose[2])
+
+        var xMinAmplitude = minAmplitude(sensor_window_transpose[0])
+        var yMinAmplitude = minAmplitude(sensor_window_transpose[1])
+        var zMinAmplitude = minAmplitude(sensor_window_transpose[2])
+
+        text_square.text = """${window_index}
+            |x: ${xAverage}, ${xStandardDeviation}, ${xRootMeanSquare}, ${xMaxAmplitude}, ${xMinAmplitude}
+            |y: ${yAverage}, ${yStandardDeviation}, ${yRootMeanSquare}, ${yMaxAmplitude}, ${yMinAmplitude}
+            |z: ${zAverage}, ${zStandardDeviation}, ${zRootMeanSquare}, ${zMaxAmplitude}, ${zMinAmplitude}
+            |""".trimMargin()
     }
 
     private fun standardDeviation(array: Array<Float>, average: Float): Float {
         var variance: Float = 0.0f
         for(f in array) variance += abs(f - average)
         return sqrt(variance)
+    }
+
+    private fun rootMeanSquare(array: Array<Float>): Float {
+        var sumSquare: Float = 0.0f
+        for(f in array) sumSquare += f*f
+        return sqrt(sumSquare / WINDOW_SIZE)
+    }
+
+    private fun maxAmplitude(array: Array<Float>): Float {
+        var maxAmp: Float = 0.0f
+        for(f in array) maxAmp = max(maxAmp, abs(f))
+        return maxAmp
+    }
+
+    private fun minAmplitude(array: Array<Float>): Float {
+        var minAmp: Float = Float.MAX_VALUE
+        for(f in array) minAmp = min(minAmp, abs(f))
+        return minAmp
     }
 
     override fun onAccuracyChanged(p0: Sensor?, p1: Int) {
