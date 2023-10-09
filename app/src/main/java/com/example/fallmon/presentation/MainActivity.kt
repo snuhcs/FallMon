@@ -26,12 +26,7 @@ import androidx.wear.compose.material.MaterialTheme
 import androidx.wear.compose.material.Text
 import com.example.fallmon.R
 import com.example.fallmon.presentation.theme.FallMonTheme
-
-import kotlin.math.abs
-import kotlin.math.max
-import kotlin.math.min
-import kotlin.math.pow
-import kotlin.math.sqrt
+import com.example.fallmon.presentation.math.FallMonMath as FMath
 
 
 class MainActivity : ComponentActivity(), SensorEventListener {
@@ -101,45 +96,45 @@ class MainActivity : ComponentActivity(), SensorEventListener {
         var yAverage = sensor_window_transpose[1].average().toFloat()
         var zAverage = sensor_window_transpose[2].average().toFloat()
 
-        var xStandardDeviation = standardDeviation(sensor_window_transpose[0], xAverage)
-        var yStandardDeviation = standardDeviation(sensor_window_transpose[1], yAverage)
-        var zStandardDeviation = standardDeviation(sensor_window_transpose[2], zAverage)
+        var xStandardDeviation = FMath.standardDeviation(sensor_window_transpose[0], xAverage)
+        var yStandardDeviation = FMath.standardDeviation(sensor_window_transpose[1], yAverage)
+        var zStandardDeviation = FMath.standardDeviation(sensor_window_transpose[2], zAverage)
 
-        var xRootMeanSquare = rootMeanSquare(sensor_window_transpose[0])
-        var yRootMeanSquare = rootMeanSquare(sensor_window_transpose[1])
-        var zRootMeanSquare = rootMeanSquare(sensor_window_transpose[2])
+        var xRootMeanSquare = FMath.rootMeanSquare(sensor_window_transpose[0])
+        var yRootMeanSquare = FMath.rootMeanSquare(sensor_window_transpose[1])
+        var zRootMeanSquare = FMath.rootMeanSquare(sensor_window_transpose[2])
 
-        var xMaxAmplitude = maxAmplitude(sensor_window_transpose[0])
-        var yMaxAmplitude = maxAmplitude(sensor_window_transpose[1])
-        var zMaxAmplitude = maxAmplitude(sensor_window_transpose[2])
+        var xMaxAmplitude = FMath.maxAmplitude(sensor_window_transpose[0])
+        var yMaxAmplitude = FMath.maxAmplitude(sensor_window_transpose[1])
+        var zMaxAmplitude = FMath.maxAmplitude(sensor_window_transpose[2])
 
-        var xMinAmplitude = minAmplitude(sensor_window_transpose[0])
-        var yMinAmplitude = minAmplitude(sensor_window_transpose[1])
-        var zMinAmplitude = minAmplitude(sensor_window_transpose[2])
+        var xMinAmplitude = FMath.minAmplitude(sensor_window_transpose[0])
+        var yMinAmplitude = FMath.minAmplitude(sensor_window_transpose[1])
+        var zMinAmplitude = FMath.minAmplitude(sensor_window_transpose[2])
 
-        var xMedian = median(sensor_window_transpose[0])
-        var yMedian = median(sensor_window_transpose[1])
-        var zMedian = median(sensor_window_transpose[2])
+        var xMedian = FMath.median(sensor_window_transpose[0])
+        var yMedian = FMath.median(sensor_window_transpose[1])
+        var zMedian = FMath.median(sensor_window_transpose[2])
 
-        var xNZC = nzc(sensor_window_transpose[0])
-        var yNZC = nzc(sensor_window_transpose[1])
-        var zNZC = nzc(sensor_window_transpose[2])
+        var xNZC = FMath.nzc(sensor_window_transpose[0])
+        var yNZC = FMath.nzc(sensor_window_transpose[1])
+        var zNZC = FMath.nzc(sensor_window_transpose[2])
 
-        var xSkewness = skewness(sensor_window_transpose[0], xAverage, xStandardDeviation)
-        var ySkewness = skewness(sensor_window_transpose[1], yAverage, yStandardDeviation)
-        var zSkewness = skewness(sensor_window_transpose[2], zAverage, zStandardDeviation)
+        var xSkewness = FMath.skewness(sensor_window_transpose[0], xAverage, xStandardDeviation)
+        var ySkewness = FMath.skewness(sensor_window_transpose[1], yAverage, yStandardDeviation)
+        var zSkewness = FMath.skewness(sensor_window_transpose[2], zAverage, zStandardDeviation)
 
-        var xKurtosis = kurtosis(sensor_window_transpose[0], xAverage, xStandardDeviation)
-        var yKurtosis = kurtosis(sensor_window_transpose[1], yAverage, yStandardDeviation)
-        var zKurtosis = kurtosis(sensor_window_transpose[2], zAverage, zStandardDeviation)
+        var xKurtosis = FMath.kurtosis(sensor_window_transpose[0], xAverage, xStandardDeviation)
+        var yKurtosis = FMath.kurtosis(sensor_window_transpose[1], yAverage, yStandardDeviation)
+        var zKurtosis = FMath.kurtosis(sensor_window_transpose[2], zAverage, zStandardDeviation)
 
-        var xPercentile1 = percentile_1(sensor_window_transpose[0])
-        var yPercentile1 = percentile_1(sensor_window_transpose[1])
-        var zPercentile1 = percentile_1(sensor_window_transpose[2])
+        var xPercentile1 = FMath.percentile_1(sensor_window_transpose[0])
+        var yPercentile1 = FMath.percentile_1(sensor_window_transpose[1])
+        var zPercentile1 = FMath.percentile_1(sensor_window_transpose[2])
 
-        var xPercentile3 = percentile_3(sensor_window_transpose[0])
-        var yPercentile3 = percentile_3(sensor_window_transpose[1])
-        var zPercentile3 = percentile_3(sensor_window_transpose[2])
+        var xPercentile3 = FMath.percentile_3(sensor_window_transpose[0])
+        var yPercentile3 = FMath.percentile_3(sensor_window_transpose[1])
+        var zPercentile3 = FMath.percentile_3(sensor_window_transpose[2])
 
         text_square.text = """${window_index}
             |x: ${xAverage}, ${xStandardDeviation}, ${xRootMeanSquare}, ${xMaxAmplitude}, ${xMinAmplitude}, ${xMedian}, ${xNZC}, ${xSkewness}, ${xKurtosis}, ${xPercentile1}, ${xPercentile3}
@@ -148,69 +143,7 @@ class MainActivity : ComponentActivity(), SensorEventListener {
             |""".trimMargin()
     }
 
-    private fun standardDeviation(array: Array<Float>, average: Float): Float {
-        var variance: Float = 0.0f
-        for(f in array) variance += abs(f - average)
-        return sqrt(variance)
-    }
 
-    private fun rootMeanSquare(array: Array<Float>): Float {
-        var sumSquare: Float = 0.0f
-        for(f in array) sumSquare += f*f
-        return sqrt(sumSquare / WINDOW_SIZE)
-    }
-
-    private fun maxAmplitude(array: Array<Float>): Float {
-        var maxAmp: Float = 0.0f
-        for(f in array) maxAmp = max(maxAmp, abs(f))
-        return maxAmp
-    }
-
-    private fun minAmplitude(array: Array<Float>): Float {
-        var minAmp: Float = Float.MAX_VALUE
-        for(f in array) minAmp = min(minAmp, abs(f))
-        return minAmp
-    }
-
-    private fun median(array: Array<Float>): Float {
-        val sortedArray = array.sorted()
-        return sortedArray[WINDOW_SIZE / 2]
-    }
-
-    private fun percentile_1(array: Array<Float>): Float {
-        val sortedArray = array.sorted()
-        return sortedArray[WINDOW_SIZE / 4]
-    }
-
-    private fun percentile_3(array: Array<Float>): Float {
-        val sortedArray = array.sorted()
-        return sortedArray[WINDOW_SIZE * 3 / 4]
-    }
-
-    private fun nzc(array: Array<Float>): Float {
-        var signArray = Array<Float>(WINDOW_SIZE) { 0.0f }
-        for(i: Int in 0 until WINDOW_SIZE)
-            if(array[i] > 0) signArray[i] = 1.0f
-            else if(array[i] < 0) signArray[i] = -1.0f
-            // else signArray[i] = 0.0f // don't have to modify
-
-        var sum = 0.0f
-        for(i: Int in 1 until WINDOW_SIZE)
-            sum += abs(signArray[i] - signArray[i-1])
-        return sum
-    }
-
-    private fun skewness(array: Array<Float>, average: Float, standardDeviation: Float): Float {
-        val sumCubedDiff = array.sumOf { (it - average).toDouble().pow(3.0) }
-        val skewness = (sumCubedDiff / WINDOW_SIZE) / standardDeviation.toDouble().pow(3.0)
-        return skewness.toFloat()
-    }
-
-    private fun kurtosis(array: Array<Float>, average: Float, standardDeviation: Float): Float {
-        val sumFourthPowerDiff = array.sumOf { (it - average).toDouble().pow(4.0) }
-        val skewness = (sumFourthPowerDiff / WINDOW_SIZE) / standardDeviation.toDouble().pow(4.0) - 3.0
-        return skewness.toFloat()
-    }
 
     override fun onAccuracyChanged(p0: Sensor?, p1: Int) {
     }
