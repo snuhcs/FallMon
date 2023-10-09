@@ -30,6 +30,7 @@ import com.example.fallmon.presentation.theme.FallMonTheme
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
+import kotlin.math.pow
 import kotlin.math.sqrt
 
 
@@ -44,8 +45,8 @@ class MainActivity : ComponentActivity(), SensorEventListener {
     private lateinit var text_square: TextView
 
     // sensor_window, window_index : for sliding window
-    private var sensor_window = Array(75, {Array<Float>(3, {0.0f})})
-    private var sensor_window_transpose = Array(3, {Array<Float>(75, {0.0f})})
+    private var sensor_window = Array(WINDOW_SIZE, {Array<Float>(3, {0.0f})})
+    private var sensor_window_transpose = Array(3, {Array<Float>(WINDOW_SIZE, {0.0f})})
     private var window_index: Int = 0
 
     /* Constructor */
@@ -116,10 +117,34 @@ class MainActivity : ComponentActivity(), SensorEventListener {
         var yMinAmplitude = minAmplitude(sensor_window_transpose[1])
         var zMinAmplitude = minAmplitude(sensor_window_transpose[2])
 
+        var xMedian = median(sensor_window_transpose[0])
+        var yMedian = median(sensor_window_transpose[1])
+        var zMedian = median(sensor_window_transpose[2])
+
+        var xNZC = nzc(sensor_window_transpose[0])
+        var yNZC = nzc(sensor_window_transpose[1])
+        var zNZC = nzc(sensor_window_transpose[2])
+
+        var xSkewness = skewness(sensor_window_transpose[0], xAverage, xStandardDeviation)
+        var ySkewness = skewness(sensor_window_transpose[1], yAverage, yStandardDeviation)
+        var zSkewness = skewness(sensor_window_transpose[2], zAverage, zStandardDeviation)
+
+        var xKurtosis = kurtosis(sensor_window_transpose[0], xAverage, xStandardDeviation)
+        var yKurtosis = kurtosis(sensor_window_transpose[1], yAverage, yStandardDeviation)
+        var zKurtosis = kurtosis(sensor_window_transpose[2], zAverage, zStandardDeviation)
+
+        var xPercentile1 = percentile_1(sensor_window_transpose[0])
+        var yPercentile1 = percentile_1(sensor_window_transpose[1])
+        var zPercentile1 = percentile_1(sensor_window_transpose[2])
+
+        var xPercentile3 = percentile_3(sensor_window_transpose[0])
+        var yPercentile3 = percentile_3(sensor_window_transpose[1])
+        var zPercentile3 = percentile_3(sensor_window_transpose[2])
+
         text_square.text = """${window_index}
-            |x: ${xAverage}, ${xStandardDeviation}, ${xRootMeanSquare}, ${xMaxAmplitude}, ${xMinAmplitude}
-            |y: ${yAverage}, ${yStandardDeviation}, ${yRootMeanSquare}, ${yMaxAmplitude}, ${yMinAmplitude}
-            |z: ${zAverage}, ${zStandardDeviation}, ${zRootMeanSquare}, ${zMaxAmplitude}, ${zMinAmplitude}
+            |x: ${xAverage}, ${xStandardDeviation}, ${xRootMeanSquare}, ${xMaxAmplitude}, ${xMinAmplitude}, ${xMedian}, ${xNZC}, ${xSkewness}, ${xKurtosis}, ${xPercentile1}, ${xPercentile3}
+            |y: ${yAverage}, ${yStandardDeviation}, ${yRootMeanSquare}, ${yMaxAmplitude}, ${yMinAmplitude}, ${yMedian}, ${yNZC}, ${ySkewness}, ${yKurtosis}, ${yPercentile1}, ${yPercentile3}
+            |z: ${zAverage}, ${zStandardDeviation}, ${zRootMeanSquare}, ${zMaxAmplitude}, ${zMinAmplitude}, ${zMedian}, ${zNZC}, ${zSkewness}, ${zKurtosis}, ${zPercentile1}, ${zPercentile3}
             |""".trimMargin()
     }
 
@@ -145,6 +170,46 @@ class MainActivity : ComponentActivity(), SensorEventListener {
         var minAmp: Float = Float.MAX_VALUE
         for(f in array) minAmp = min(minAmp, abs(f))
         return minAmp
+    }
+
+    private fun median(array: Array<Float>): Float {
+        val sortedArray = array.sorted()
+        return sortedArray[WINDOW_SIZE / 2]
+    }
+
+    private fun percentile_1(array: Array<Float>): Float {
+        val sortedArray = array.sorted()
+        return sortedArray[WINDOW_SIZE / 4]
+    }
+
+    private fun percentile_3(array: Array<Float>): Float {
+        val sortedArray = array.sorted()
+        return sortedArray[WINDOW_SIZE * 3 / 4]
+    }
+
+    private fun nzc(array: Array<Float>): Float {
+        var signArray = Array<Float>(WINDOW_SIZE) { 0.0f }
+        for(i: Int in 0 until WINDOW_SIZE)
+            if(array[i] > 0) signArray[i] = 1.0f
+            else if(array[i] < 0) signArray[i] = -1.0f
+            // else signArray[i] = 0.0f // don't have to modify
+
+        var sum = 0.0f
+        for(i: Int in 1 until WINDOW_SIZE)
+            sum += abs(signArray[i] - signArray[i-1])
+        return sum
+    }
+
+    private fun skewness(array: Array<Float>, average: Float, standardDeviation: Float): Float {
+        val sumCubedDiff = array.sumOf { (it - average).toDouble().pow(3.0) }
+        val skewness = (sumCubedDiff / WINDOW_SIZE) / standardDeviation.toDouble().pow(3.0)
+        return skewness.toFloat()
+    }
+
+    private fun kurtosis(array: Array<Float>, average: Float, standardDeviation: Float): Float {
+        val sumFourthPowerDiff = array.sumOf { (it - average).toDouble().pow(4.0) }
+        val skewness = (sumFourthPowerDiff / WINDOW_SIZE) / standardDeviation.toDouble().pow(4.0) - 3.0
+        return skewness.toFloat()
     }
 
     override fun onAccuracyChanged(p0: Sensor?, p1: Int) {
