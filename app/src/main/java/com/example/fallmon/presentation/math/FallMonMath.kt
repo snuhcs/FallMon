@@ -1,16 +1,20 @@
 package com.example.fallmon.presentation.math
 
+import org.apache.commons.math3.transform.DftNormalization
+import org.apache.commons.math3.transform.FastFourierTransformer
+import org.apache.commons.math3.transform.TransformType
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.pow
 import kotlin.math.sqrt
 
+
 object FallMonMath {
     fun standardDeviation(array: Array<Float>, average: Float): Float {
         var variance: Float = 0.0f
-        for(f in array) variance += abs(f - average)
-        return sqrt(variance)
+        for(f in array) variance += (f - average).pow(2)
+        return sqrt(variance / array.size)
     }
 
     fun rootMeanSquare(array: Array<Float>): Float {
@@ -36,14 +40,16 @@ object FallMonMath {
         return sortedArray[array.size / 2]
     }
 
+    // Simplified assume that WINDOW_SIZE = 75
     fun percentile_1(array: Array<Float>): Float {
         val sortedArray = array.sorted()
-        return sortedArray[array.size / 4]
+        return (sortedArray[18] + sortedArray[19]) / 2
     }
 
+    // Simplified assume that WINDOW_SIZE = 75
     fun percentile_3(array: Array<Float>): Float {
         val sortedArray = array.sorted()
-        return sortedArray[array.size * 3 / 4]
+        return (sortedArray[55] + sortedArray[56]) / 2
     }
 
     fun nzc(array: Array<Float>): Float {
@@ -69,5 +75,31 @@ object FallMonMath {
         val sumFourthPowerDiff = array.sumOf { (it - average).toDouble().pow(4.0) }
         val skewness = (sumFourthPowerDiff / array.size) / standardDeviation.toDouble().pow(4.0) - 3.0
         return skewness.toFloat()
+    }
+
+    fun frequencySpectrum(array: Array<Float>): Array<Float> {
+        // FFT needs DoubleArray Type
+        val doubleArray = DoubleArray(array.size) { array[it].toDouble() }
+
+        // padding 0 for make array size to power of 2
+        var size = 1
+        while (size < array.size) size *= 2
+        val paddedDoubleArray = DoubleArray(size)
+
+        System.arraycopy(doubleArray, 0, paddedDoubleArray, 0, array.size)
+
+        // Create FFT instance
+        val transformer = FastFourierTransformer(DftNormalization.STANDARD)
+
+        // Perform FFT
+        val fft = transformer.transform(paddedDoubleArray, TransformType.FORWARD)
+
+        // Calculate frequency spectrum
+        val freqSpec = fft
+            .drop(1)    //  exclude index 0
+            .map { it.abs() }
+
+        // resize the result and return
+        return freqSpec.map { it.toFloat() }.toTypedArray().sliceArray(0..array.size - 2)
     }
 }

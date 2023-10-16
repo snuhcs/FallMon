@@ -92,6 +92,12 @@ class MainActivity : ComponentActivity(), SensorEventListener {
 
     private fun sensorWindowFulled() {
 
+        sensor_window_transpose = Array(3, {Array<Float>(WINDOW_SIZE, {0.0f})})
+
+        for(i: Int in 0 until 3)
+            for(j: Int in 0 until WINDOW_SIZE)
+                sensor_window_transpose[i][j] = (i+1)*(j+1).toFloat()
+
         var xAverage = sensor_window_transpose[0].average().toFloat()
         var yAverage = sensor_window_transpose[1].average().toFloat()
         var zAverage = sensor_window_transpose[2].average().toFloat()
@@ -136,10 +142,22 @@ class MainActivity : ComponentActivity(), SensorEventListener {
         var yPercentile3 = FMath.percentile_3(sensor_window_transpose[1])
         var zPercentile3 = FMath.percentile_3(sensor_window_transpose[2])
 
+        var xFreq = FMath.frequencySpectrum(sensor_window_transpose[0])
+        var yFreq = FMath.frequencySpectrum(sensor_window_transpose[1])
+        var zFreq = FMath.frequencySpectrum(sensor_window_transpose[2])
+
+        var xFreqAverage = xFreq.average().toFloat()
+        var yFreqAverage = yFreq.average().toFloat()
+        var zFreqAverage = zFreq.average().toFloat()
+
+        var xFreqMedian = FMath.median(xFreq)
+        var yFreqMedian = FMath.median(yFreq)
+        var zFreqMedian = FMath.median(zFreq)
+
         text_square.text = """${window_index}
-            |x: ${xAverage}, ${xStandardDeviation}, ${xRootMeanSquare}, ${xMaxAmplitude}, ${xMinAmplitude}, ${xMedian}, ${xNZC}, ${xSkewness}, ${xKurtosis}, ${xPercentile1}, ${xPercentile3}
-            |y: ${yAverage}, ${yStandardDeviation}, ${yRootMeanSquare}, ${yMaxAmplitude}, ${yMinAmplitude}, ${yMedian}, ${yNZC}, ${ySkewness}, ${yKurtosis}, ${yPercentile1}, ${yPercentile3}
-            |z: ${zAverage}, ${zStandardDeviation}, ${zRootMeanSquare}, ${zMaxAmplitude}, ${zMinAmplitude}, ${zMedian}, ${zNZC}, ${zSkewness}, ${zKurtosis}, ${zPercentile1}, ${zPercentile3}
+            |x: ${xAverage}, ${xStandardDeviation}, ${xRootMeanSquare}, ${xMaxAmplitude}, ${xMinAmplitude}, ${xMedian}, ${xNZC}, ${xSkewness}, ${xKurtosis}, ${xPercentile1}, ${xPercentile3}, ${xFreqAverage}, ${xFreqMedian}
+            |y: ${yAverage}, ${yStandardDeviation}, ${yRootMeanSquare}, ${yMaxAmplitude}, ${yMinAmplitude}, ${yMedian}, ${yNZC}, ${ySkewness}, ${yKurtosis}, ${yPercentile1}, ${yPercentile3}, ${yFreqAverage}, ${yFreqMedian}
+            |z: ${zAverage}, ${zStandardDeviation}, ${zRootMeanSquare}, ${zMaxAmplitude}, ${zMinAmplitude}, ${zMedian}, ${zNZC}, ${zSkewness}, ${zKurtosis}, ${zPercentile1}, ${zPercentile3}, ${zFreqAverage}, ${zFreqMedian}
             |""".trimMargin()
     }
 
