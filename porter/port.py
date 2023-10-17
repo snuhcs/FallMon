@@ -17,7 +17,7 @@ if __name__ == "__main__":
         wrong_usage()
 
     mode = sys.argv[1]
-    filename = 'output.' + mode
+    filename = 'Model.' + mode
     model_path = 'model.pkl'
 
     if '-o' in sys.argv:

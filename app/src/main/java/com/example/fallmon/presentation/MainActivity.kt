@@ -11,6 +11,7 @@ import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import android.os.Bundle
+import android.util.Log
 import android.widget.TextView
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.background
@@ -27,7 +28,8 @@ import androidx.wear.compose.material.Text
 import com.example.fallmon.R
 import com.example.fallmon.presentation.theme.FallMonTheme
 import com.example.fallmon.presentation.math.FallMonMath as FMath
-
+import com.example.fallmon.presentation.Model
+typealias FeatureExtractor = (Array<Float>) -> Float
 
 class MainActivity : ComponentActivity(), SensorEventListener {
 
@@ -44,6 +46,7 @@ class MainActivity : ComponentActivity(), SensorEventListener {
     private var sensor_window_transpose = Array(3, {Array<Float>(WINDOW_SIZE, {0.0f})})
     private var window_index: Int = 0
 
+    // type alias
     /* Constructor */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -91,74 +94,44 @@ class MainActivity : ComponentActivity(), SensorEventListener {
     }
 
     private fun sensorWindowFulled() {
-
         sensor_window_transpose = Array(3, {Array<Float>(WINDOW_SIZE, {0.0f})})
 
         for(i: Int in 0 until 3)
             for(j: Int in 0 until WINDOW_SIZE)
-                sensor_window_transpose[i][j] = (i+1)*(j+1).toFloat()
+                sensor_window_transpose[i][j] = sensor_window[j][i]
 
-        var xAverage = sensor_window_transpose[0].average().toFloat()
-        var yAverage = sensor_window_transpose[1].average().toFloat()
-        var zAverage = sensor_window_transpose[2].average().toFloat()
+        // features used in classification model
+        // redundant calculations(average, standardDeviation) exist
+        val average:FeatureExtractor = {v -> v.average().toFloat()}
+        val standardDeviation:FeatureExtractor = {v -> FMath.standardDeviation(v, average(v))}
+        val rootMinSquare:FeatureExtractor = {v -> FMath.rootMeanSquare(v)}
+        val maxAmplitude:FeatureExtractor = {v -> FMath.maxAmplitude(v)}
+        val minAmplitude:FeatureExtractor = {v -> FMath.minAmplitude(v)}
+        val median:FeatureExtractor = {v -> FMath.median(v)}
+        val nzc:FeatureExtractor = {v -> FMath.nzc(v)}
+        val skewness:FeatureExtractor = {v -> FMath.skewness(v, average(v), standardDeviation(v))}
+        val kurtosis:FeatureExtractor = {v -> FMath.kurtosis(v, average(v), standardDeviation(v))}
+        val percentile1:FeatureExtractor = {v -> FMath.percentile_1(v)}
+        val percentile3:FeatureExtractor = {v -> FMath.percentile_3(v)}
+        val freqAverage:FeatureExtractor = {v -> FMath.frequencySpectrum(v).average().toFloat()}
+        val freqMedian:FeatureExtractor = {v -> FMath.median(v)}
+        val zero:FeatureExtractor = {_ -> 0.0F}
 
-        var xStandardDeviation = FMath.standardDeviation(sensor_window_transpose[0], xAverage)
-        var yStandardDeviation = FMath.standardDeviation(sensor_window_transpose[1], yAverage)
-        var zStandardDeviation = FMath.standardDeviation(sensor_window_transpose[2], zAverage)
-
-        var xRootMeanSquare = FMath.rootMeanSquare(sensor_window_transpose[0])
-        var yRootMeanSquare = FMath.rootMeanSquare(sensor_window_transpose[1])
-        var zRootMeanSquare = FMath.rootMeanSquare(sensor_window_transpose[2])
-
-        var xMaxAmplitude = FMath.maxAmplitude(sensor_window_transpose[0])
-        var yMaxAmplitude = FMath.maxAmplitude(sensor_window_transpose[1])
-        var zMaxAmplitude = FMath.maxAmplitude(sensor_window_transpose[2])
-
-        var xMinAmplitude = FMath.minAmplitude(sensor_window_transpose[0])
-        var yMinAmplitude = FMath.minAmplitude(sensor_window_transpose[1])
-        var zMinAmplitude = FMath.minAmplitude(sensor_window_transpose[2])
-
-        var xMedian = FMath.median(sensor_window_transpose[0])
-        var yMedian = FMath.median(sensor_window_transpose[1])
-        var zMedian = FMath.median(sensor_window_transpose[2])
-
-        var xNZC = FMath.nzc(sensor_window_transpose[0])
-        var yNZC = FMath.nzc(sensor_window_transpose[1])
-        var zNZC = FMath.nzc(sensor_window_transpose[2])
-
-        var xSkewness = FMath.skewness(sensor_window_transpose[0], xAverage, xStandardDeviation)
-        var ySkewness = FMath.skewness(sensor_window_transpose[1], yAverage, yStandardDeviation)
-        var zSkewness = FMath.skewness(sensor_window_transpose[2], zAverage, zStandardDeviation)
-
-        var xKurtosis = FMath.kurtosis(sensor_window_transpose[0], xAverage, xStandardDeviation)
-        var yKurtosis = FMath.kurtosis(sensor_window_transpose[1], yAverage, yStandardDeviation)
-        var zKurtosis = FMath.kurtosis(sensor_window_transpose[2], zAverage, zStandardDeviation)
-
-        var xPercentile1 = FMath.percentile_1(sensor_window_transpose[0])
-        var yPercentile1 = FMath.percentile_1(sensor_window_transpose[1])
-        var zPercentile1 = FMath.percentile_1(sensor_window_transpose[2])
-
-        var xPercentile3 = FMath.percentile_3(sensor_window_transpose[0])
-        var yPercentile3 = FMath.percentile_3(sensor_window_transpose[1])
-        var zPercentile3 = FMath.percentile_3(sensor_window_transpose[2])
-
-        var xFreq = FMath.frequencySpectrum(sensor_window_transpose[0])
-        var yFreq = FMath.frequencySpectrum(sensor_window_transpose[1])
-        var zFreq = FMath.frequencySpectrum(sensor_window_transpose[2])
-
-        var xFreqAverage = xFreq.average().toFloat()
-        var yFreqAverage = yFreq.average().toFloat()
-        var zFreqAverage = zFreq.average().toFloat()
-
-        var xFreqMedian = FMath.median(xFreq)
-        var yFreqMedian = FMath.median(yFreq)
-        var zFreqMedian = FMath.median(zFreq)
-
-        text_square.text = """${window_index}
-            |x: ${xAverage}, ${xStandardDeviation}, ${xRootMeanSquare}, ${xMaxAmplitude}, ${xMinAmplitude}, ${xMedian}, ${xNZC}, ${xSkewness}, ${xKurtosis}, ${xPercentile1}, ${xPercentile3}, ${xFreqAverage}, ${xFreqMedian}
-            |y: ${yAverage}, ${yStandardDeviation}, ${yRootMeanSquare}, ${yMaxAmplitude}, ${yMinAmplitude}, ${yMedian}, ${yNZC}, ${ySkewness}, ${yKurtosis}, ${yPercentile1}, ${yPercentile3}, ${yFreqAverage}, ${yFreqMedian}
-            |z: ${zAverage}, ${zStandardDeviation}, ${zRootMeanSquare}, ${zMaxAmplitude}, ${zMinAmplitude}, ${zMedian}, ${zNZC}, ${zSkewness}, ${zKurtosis}, ${zPercentile1}, ${zPercentile3}, ${zFreqAverage}, ${zFreqMedian}
+        val featureExtractors :Array<FeatureExtractor> = arrayOf(average, standardDeviation,
+            rootMinSquare, maxAmplitude, minAmplitude, median, nzc, skewness, kurtosis, percentile1,
+            percentile3, freqAverage, freqMedian, zero, zero)
+        assert(featureExtractors.size == 15)
+        val features: Array<Float> = featureExtractors.map{f -> sensor_window_transpose.map{v -> f(v)}}.flatten().toTypedArray()
+        val score = Model.score(features.map {t -> t.toDouble()}.toDoubleArray())
+        val featureText = """${window_index}
+            |score: ${score[0]} ${score[1]}
+            |x: ${features.filterIndexed{i, _ -> i % 3 == 0}.joinToString(limit=5, transform = {x-> "%.2f".format(x)})}
+            |y: ${features.filterIndexed{i, _ -> i % 3 == 1}.joinToString(limit=5, transform = {x-> "%.2f".format(x)})}
+            |z: ${features.filterIndexed{i, _ -> i % 3 == 2}.joinToString(limit=5, transform = {x-> "%.2f".format(x)})}
             |""".trimMargin()
+        Log.d("score", score.joinToString { x -> x.toString() })
+        Log.d("Features", featureText)
+        text_square.text = featureText
     }
 
 

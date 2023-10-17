@@ -54,3 +54,5 @@ python port.py c -o model.c -i model.pkl
 ## 기타 사항
 
 Random forest 특성상 코드의 길이가 매우 길어질 수 있기 때문에, 성능이 저조하면 추후에 최적화 작업을 진행할 때 Java나 Kotlin보다는 C로 변환한 다음 dynamic linking을 하는 방법을 생각해볼 수 있겠습니다.
+
+Model.java를 src/main/java에 복사하여 사용합니다. 추후에 자동화할 수 있습니다.
