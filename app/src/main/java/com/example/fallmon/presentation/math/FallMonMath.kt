@@ -2,35 +2,13 @@ package com.example.fallmon.presentation.math
 
 import org.jtransforms.fft.DoubleFFT_1D
 import kotlin.math.abs
-import kotlin.math.cos
 import kotlin.math.log2
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.pow
-import kotlin.math.sin
 import kotlin.math.sqrt
 
 
-/* additional data class & function for Cooley-Tukey FFT algorithm */
-data class Complex(val real: Double, val imag: Double) : (Int) -> Complex {
-    operator fun plus(other: Complex) = Complex(real + other.real, imag + other.imag)
-    operator fun minus(other: Complex) = Complex(real - other.real, imag - other.imag)
-    operator fun times(other: Complex) = Complex(real * other.real - imag * other.imag, real * other.imag + imag * other.real)
-    fun abs(): Double {
-        return sqrt(real.pow(2) + imag.pow(2))
-    }
-
-    companion object {
-        fun polar(r: Double, theta: Double) = Complex(r * cos(theta), r * sin(theta))
-    }
-
-    override fun invoke(p1: Int): Complex {
-        return Complex(real, imag)
-    }
-
-}
-
-typealias ComplexArray = Array<Complex>
 
 object FallMonMath {
     fun standardDeviation(array: Array<Float>, average: Float): Float {
@@ -128,7 +106,7 @@ object FallMonMath {
         }
 
         // resize the result and return
-        return result.map { it.toFloat() }.toTypedArray()
+        return result
     }
 
     // below two functions have error in calculation
