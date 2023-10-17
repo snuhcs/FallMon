@@ -2,7 +2,7 @@ package com.example.fallmon.presentation.math
 
 import org.jtransforms.fft.DoubleFFT_1D
 import kotlin.math.abs
-import kotlin.math.log2
+import kotlin.math.ln
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.pow
@@ -110,10 +110,18 @@ object FallMonMath {
     }
 
     // below two functions have error in calculation
-    fun entropy(array: Array<Float>): Float {
+    /*fun entropy(array: Array<Float>): Float {
         val counts = array.groupBy { it }.mapValues { it.value.size }
         val probabilities = counts.values.map { it / array.size }
         return -probabilities.sumOf { it * log2(it.toDouble()) }.toFloat()
+    }*/
+
+    fun entropy(array: Array<Float>): Float {
+
+        val sum = array.sum()
+        if(sum == 0.0f) return 0.0f
+
+        return -array.sumOf { (it / sum) * ln((it / sum).toDouble()) }.toFloat()
     }
 
     fun energy(array: Array<Float>): Float {
