@@ -6,8 +6,6 @@
 
 package com.example.fallmon.presentation
 
-import android.annotation.SuppressLint
-import android.content.Context.*
 import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
@@ -42,8 +40,8 @@ class MainActivity : ComponentActivity(), SensorEventListener {
     private lateinit var text_square: TextView
 
     // sensor_window, window_index : for sliding window
-    private var sensor_window = Array(WINDOW_SIZE) { Array(3) { 0.0f } }
-    private var sensor_window_transpose = Array(3) { Array(WINDOW_SIZE) { 0.0f } }
+    private var sensor_window = Array(WINDOW_SIZE, {Array<Float>(3, {0.0f})})
+    private var sensor_window_transpose = Array(3, {Array<Float>(WINDOW_SIZE, {0.0f})})
     private var window_index: Int = 0
 
     /* Constructor */
@@ -56,7 +54,7 @@ class MainActivity : ComponentActivity(), SensorEventListener {
 
     /* Set up sensor when the app starts */
     private fun setUpSensor(){
-        sensorManager = getSystemService(SENSOR_SERVICE) as SensorManager
+        sensorManager = getSystemService(android.content.Context.SENSOR_SERVICE) as android.hardware.SensorManager
         mAccelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)?.also{
             sensorManager.registerListener(
                 this,
@@ -92,91 +90,75 @@ class MainActivity : ComponentActivity(), SensorEventListener {
         }
     }
 
-    @SuppressLint("SetTextI18n")
     private fun sensorWindowFulled() {
 
-        sensor_window_transpose = Array(3) { Array(WINDOW_SIZE) { 0.0f } }
+        sensor_window_transpose = Array(3, {Array<Float>(WINDOW_SIZE, {0.0f})})
 
         for(i: Int in 0 until 3)
             for(j: Int in 0 until WINDOW_SIZE)
                 sensor_window_transpose[i][j] = (i+1)*(j+1).toFloat()
 
-        val xAverage = sensor_window_transpose[0].average().toFloat()
-        val yAverage = sensor_window_transpose[1].average().toFloat()
-        val zAverage = sensor_window_transpose[2].average().toFloat()
+        var xAverage = sensor_window_transpose[0].average().toFloat()
+        var yAverage = sensor_window_transpose[1].average().toFloat()
+        var zAverage = sensor_window_transpose[2].average().toFloat()
 
-        val xStandardDeviation = FMath.standardDeviation(sensor_window_transpose[0], xAverage)
-        val yStandardDeviation = FMath.standardDeviation(sensor_window_transpose[1], yAverage)
-        val zStandardDeviation = FMath.standardDeviation(sensor_window_transpose[2], zAverage)
+        var xStandardDeviation = FMath.standardDeviation(sensor_window_transpose[0], xAverage)
+        var yStandardDeviation = FMath.standardDeviation(sensor_window_transpose[1], yAverage)
+        var zStandardDeviation = FMath.standardDeviation(sensor_window_transpose[2], zAverage)
 
-        val xRootMeanSquare = FMath.rootMeanSquare(sensor_window_transpose[0])
-        val yRootMeanSquare = FMath.rootMeanSquare(sensor_window_transpose[1])
-        val zRootMeanSquare = FMath.rootMeanSquare(sensor_window_transpose[2])
+        var xRootMeanSquare = FMath.rootMeanSquare(sensor_window_transpose[0])
+        var yRootMeanSquare = FMath.rootMeanSquare(sensor_window_transpose[1])
+        var zRootMeanSquare = FMath.rootMeanSquare(sensor_window_transpose[2])
 
-        val xMaxAmplitude = FMath.maxAmplitude(sensor_window_transpose[0])
-        val yMaxAmplitude = FMath.maxAmplitude(sensor_window_transpose[1])
-        val zMaxAmplitude = FMath.maxAmplitude(sensor_window_transpose[2])
+        var xMaxAmplitude = FMath.maxAmplitude(sensor_window_transpose[0])
+        var yMaxAmplitude = FMath.maxAmplitude(sensor_window_transpose[1])
+        var zMaxAmplitude = FMath.maxAmplitude(sensor_window_transpose[2])
 
-        val xMinAmplitude = FMath.minAmplitude(sensor_window_transpose[0])
-        val yMinAmplitude = FMath.minAmplitude(sensor_window_transpose[1])
-        val zMinAmplitude = FMath.minAmplitude(sensor_window_transpose[2])
+        var xMinAmplitude = FMath.minAmplitude(sensor_window_transpose[0])
+        var yMinAmplitude = FMath.minAmplitude(sensor_window_transpose[1])
+        var zMinAmplitude = FMath.minAmplitude(sensor_window_transpose[2])
 
-        val xMedian = FMath.median(sensor_window_transpose[0])
-        val yMedian = FMath.median(sensor_window_transpose[1])
-        val zMedian = FMath.median(sensor_window_transpose[2])
+        var xMedian = FMath.median(sensor_window_transpose[0])
+        var yMedian = FMath.median(sensor_window_transpose[1])
+        var zMedian = FMath.median(sensor_window_transpose[2])
 
-        val xNZC = FMath.nzc(sensor_window_transpose[0])
-        val yNZC = FMath.nzc(sensor_window_transpose[1])
-        val zNZC = FMath.nzc(sensor_window_transpose[2])
+        var xNZC = FMath.nzc(sensor_window_transpose[0])
+        var yNZC = FMath.nzc(sensor_window_transpose[1])
+        var zNZC = FMath.nzc(sensor_window_transpose[2])
 
-        val xSkewness = FMath.skewness(sensor_window_transpose[0], xAverage, xStandardDeviation)
-        val ySkewness = FMath.skewness(sensor_window_transpose[1], yAverage, yStandardDeviation)
-        val zSkewness = FMath.skewness(sensor_window_transpose[2], zAverage, zStandardDeviation)
+        var xSkewness = FMath.skewness(sensor_window_transpose[0], xAverage, xStandardDeviation)
+        var ySkewness = FMath.skewness(sensor_window_transpose[1], yAverage, yStandardDeviation)
+        var zSkewness = FMath.skewness(sensor_window_transpose[2], zAverage, zStandardDeviation)
 
-        val xKurtosis = FMath.kurtosis(sensor_window_transpose[0], xAverage, xStandardDeviation)
-        val yKurtosis = FMath.kurtosis(sensor_window_transpose[1], yAverage, yStandardDeviation)
-        val zKurtosis = FMath.kurtosis(sensor_window_transpose[2], zAverage, zStandardDeviation)
+        var xKurtosis = FMath.kurtosis(sensor_window_transpose[0], xAverage, xStandardDeviation)
+        var yKurtosis = FMath.kurtosis(sensor_window_transpose[1], yAverage, yStandardDeviation)
+        var zKurtosis = FMath.kurtosis(sensor_window_transpose[2], zAverage, zStandardDeviation)
 
-        val xPercentile1 = FMath.percentile1(sensor_window_transpose[0])
-        val yPercentile1 = FMath.percentile1(sensor_window_transpose[1])
-        val zPercentile1 = FMath.percentile1(sensor_window_transpose[2])
+        var xPercentile1 = FMath.percentile_1(sensor_window_transpose[0])
+        var yPercentile1 = FMath.percentile_1(sensor_window_transpose[1])
+        var zPercentile1 = FMath.percentile_1(sensor_window_transpose[2])
 
-        val xPercentile3 = FMath.percentile3(sensor_window_transpose[0])
-        val yPercentile3 = FMath.percentile3(sensor_window_transpose[1])
-        val zPercentile3 = FMath.percentile3(sensor_window_transpose[2])
+        var xPercentile3 = FMath.percentile_3(sensor_window_transpose[0])
+        var yPercentile3 = FMath.percentile_3(sensor_window_transpose[1])
+        var zPercentile3 = FMath.percentile_3(sensor_window_transpose[2])
 
-        val xFreq = FMath.frequencySpectrum(sensor_window_transpose[0])
-        val yFreq = FMath.frequencySpectrum(sensor_window_transpose[1])
-        val zFreq = FMath.frequencySpectrum(sensor_window_transpose[2])
+        var xFreq = FMath.frequencySpectrum(sensor_window_transpose[0])
+        var yFreq = FMath.frequencySpectrum(sensor_window_transpose[1])
+        var zFreq = FMath.frequencySpectrum(sensor_window_transpose[2])
 
-        val xFreqAverage = xFreq.average().toFloat()
-        val yFreqAverage = yFreq.average().toFloat()
-        val zFreqAverage = zFreq.average().toFloat()
+        var xFreqAverage = xFreq.average().toFloat()
+        var yFreqAverage = yFreq.average().toFloat()
+        var zFreqAverage = zFreq.average().toFloat()
 
-        val xFreqMedian = FMath.median(xFreq)
-        val yFreqMedian = FMath.median(yFreq)
-        val zFreqMedian = FMath.median(zFreq)
-
-        // below two functions would be fixed
-        val xEntropy = FMath.entropy(xFreq)
-        val yEntropy = FMath.entropy(yFreq)
-        val zEntropy = FMath.entropy(zFreq)
-
-        val xEnergy = FMath.energy(xFreq)
-        val yEnergy = FMath.energy(yFreq)
-        val zEnergy = FMath.energy(zFreq)
+        var xFreqMedian = FMath.median(xFreq)
+        var yFreqMedian = FMath.median(yFreq)
+        var zFreqMedian = FMath.median(zFreq)
 
         text_square.text = """${window_index}
-            |x: ${xAverage}, ${xStandardDeviation}, ${xRootMeanSquare}, ${xMaxAmplitude}, ${xMinAmplitude}, ${xMedian}, ${xNZC}, ${xSkewness}, ${xKurtosis}, ${xPercentile1}, ${xPercentile3}, ${xFreqAverage}, ${xFreqMedian}, ${xEntropy}, ${xEnergy}
+            |x: ${xAverage}, ${xStandardDeviation}, ${xRootMeanSquare}, ${xMaxAmplitude}, ${xMinAmplitude}, ${xMedian}, ${xNZC}, ${xSkewness}, ${xKurtosis}, ${xPercentile1}, ${xPercentile3}, ${xFreqAverage}, ${xFreqMedian}
+            |y: ${yAverage}, ${yStandardDeviation}, ${yRootMeanSquare}, ${yMaxAmplitude}, ${yMinAmplitude}, ${yMedian}, ${yNZC}, ${ySkewness}, ${yKurtosis}, ${yPercentile1}, ${yPercentile3}, ${yFreqAverage}, ${yFreqMedian}
+            |z: ${zAverage}, ${zStandardDeviation}, ${zRootMeanSquare}, ${zMaxAmplitude}, ${zMinAmplitude}, ${zMedian}, ${zNZC}, ${zSkewness}, ${zKurtosis}, ${zPercentile1}, ${zPercentile3}, ${zFreqAverage}, ${zFreqMedian}
             |""".trimMargin()
-        /*
-        text_square.text = """${window_index}
-            |x: ${xAverage}, ${xStandardDeviation}, ${xRootMeanSquare}, ${xMaxAmplitude}, ${xMinAmplitude}, ${xMedian}, ${xNZC}, ${xSkewness}, ${xKurtosis}, ${xPercentile1}, ${xPercentile3}, ${xFreqAverage}, ${xFreqMedian}, ${xEntropy}, ${xEnergy}
-            |y: ${yAverage}, ${yStandardDeviation}, ${yRootMeanSquare}, ${yMaxAmplitude}, ${yMinAmplitude}, ${yMedian}, ${yNZC}, ${ySkewness}, ${yKurtosis}, ${yPercentile1}, ${yPercentile3}, ${yFreqAverage}, ${yFreqMedian}, ${yEntropy}, ${yEnergy}
-            |z: ${zAverage}, ${zStandardDeviation}, ${zRootMeanSquare}, ${zMaxAmplitude}, ${zMinAmplitude}, ${zMedian}, ${zNZC}, ${zSkewness}, ${zKurtosis}, ${zPercentile1}, ${zPercentile3}, ${zFreqAverage}, ${zFreqMedian}, ${zEntropy}, ${zEnergy}
-            |""".trimMargin()
-
-         */
     }
 
 
