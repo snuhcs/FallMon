@@ -14,13 +14,16 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.TextView
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.wear.compose.material.MaterialTheme
@@ -42,8 +45,8 @@ class MainActivity : ComponentActivity(), SensorEventListener {
     private lateinit var text_square: TextView
 
     // sensor_window, window_index : for sliding window
-    private var sensor_window = Array(WINDOW_SIZE, {Array<Float>(3, {0.0f})})
-    private var sensor_window_transpose = Array(3, {Array<Float>(WINDOW_SIZE, {0.0f})})
+    private var sensor_window = Array(WINDOW_SIZE) { Array(3) { 0.0f } }
+    private var sensor_window_transpose = Array(3) { Array(WINDOW_SIZE) { 0.0f } }
     private var window_index: Int = 0
 
     // type alias
@@ -111,8 +114,8 @@ class MainActivity : ComponentActivity(), SensorEventListener {
         val nzc:FeatureExtractor = {v -> FMath.nzc(v)}
         val skewness:FeatureExtractor = {v -> FMath.skewness(v, average(v), standardDeviation(v))}
         val kurtosis:FeatureExtractor = {v -> FMath.kurtosis(v, average(v), standardDeviation(v))}
-        val percentile1:FeatureExtractor = {v -> FMath.percentile_1(v)}
-        val percentile3:FeatureExtractor = {v -> FMath.percentile_3(v)}
+        val percentile1:FeatureExtractor = {v -> FMath.percentile1(v)}
+        val percentile3:FeatureExtractor = {v -> FMath.percentile3(v)}
         val freqAverage:FeatureExtractor = {v -> FMath.frequencySpectrum(v).average().toFloat()}
         val freqMedian:FeatureExtractor = {v -> FMath.median(v)}
         val zero:FeatureExtractor = {_ -> 0.0F}
@@ -163,7 +166,7 @@ fun SensorData(v1: Float, v2: Float, v3: Float) {
 
 
 @Composable
-fun WearApp() {
+fun WearApp(greetingName: String) {
     FallMonTheme {
         /* If you have enough items in your list, use [ScalingLazyColumn] which is an optimized
          * version of LazyColumn for wear devices with some added features. For more information,
@@ -175,13 +178,23 @@ fun WearApp() {
                 .background(MaterialTheme.colors.background),
             verticalArrangement = Arrangement.Center
         ) {
-            SensorData(0f, 0f , 0f)
+            Greeting(greetingName = greetingName)
         }
     }
+}
+
+@Composable
+fun Greeting(greetingName: String) {
+    Text(
+        modifier = Modifier.fillMaxWidth(),
+        textAlign = TextAlign.Center,
+        color = MaterialTheme.colors.primary,
+        text = stringResource(R.string.hello_world, greetingName)
+    )
 }
 
 @Preview(device = Devices.WEAR_OS_SMALL_ROUND, showSystemUi = true)
 @Composable
 fun DefaultPreview() {
-    WearApp()
+    WearApp("Preview Android")
 }

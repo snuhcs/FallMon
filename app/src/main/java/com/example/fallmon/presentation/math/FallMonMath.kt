@@ -1,30 +1,30 @@
 package com.example.fallmon.presentation.math
 
-import org.apache.commons.math3.transform.DftNormalization
-import org.apache.commons.math3.transform.FastFourierTransformer
-import org.apache.commons.math3.transform.TransformType
+import org.jtransforms.fft.DoubleFFT_1D
 import kotlin.math.abs
+import kotlin.math.ln
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.pow
 import kotlin.math.sqrt
 
 
+
 object FallMonMath {
     fun standardDeviation(array: Array<Float>, average: Float): Float {
-        var variance: Float = 0.0f
+        var variance = 0.0f
         for(f in array) variance += (f - average).pow(2)
         return sqrt(variance / array.size)
     }
 
     fun rootMeanSquare(array: Array<Float>): Float {
-        var sumSquare: Float = 0.0f
+        var sumSquare = 0.0f
         for(f in array) sumSquare += f*f
         return sqrt(sumSquare / array.size)
     }
 
     fun maxAmplitude(array: Array<Float>): Float {
-        var maxAmp: Float = 0.0f
+        var maxAmp = 0.0f
         for(f in array) maxAmp = max(maxAmp, abs(f))
         return maxAmp
     }
@@ -41,20 +41,20 @@ object FallMonMath {
     }
 
     // Simplified assume that WINDOW_SIZE = 75
-    fun percentile_1(array: Array<Float>): Float {
+    fun percentile1(array: Array<Float>): Float {
         val sortedArray = array.sorted()
         return (sortedArray[18] + sortedArray[19]) / 2
     }
 
     // Simplified assume that WINDOW_SIZE = 75
-    fun percentile_3(array: Array<Float>): Float {
+    fun percentile3(array: Array<Float>): Float {
         val sortedArray = array.sorted()
         return (sortedArray[55] + sortedArray[56]) / 2
     }
 
     fun nzc(array: Array<Float>): Float {
-        var signArray = Array<Float>(array.size) { 0.0f }
-        for(i: Int in 0 until array.size)
+        val signArray = Array(array.size) { 0.0f }
+        for(i: Int in array.indices)
             if(array[i] > 0) signArray[i] = 1.0f
             else if(array[i] < 0) signArray[i] = -1.0f
         // else signArray[i] = 0.0f // don't have to modify
@@ -77,29 +77,49 @@ object FallMonMath {
         return skewness.toFloat()
     }
 
+    fun fft(input: DoubleArray): DoubleArray {
+        val fft = DoubleFFT_1D(input.size.toLong() * 2)
+
+        // make double -> ( real double, imag double(=0) )
+        val result = DoubleArray(input.size * 2) { 0.0 }
+        for (i in input.indices) result[i * 2] = input[i]
+
+        fft.realForward(result)
+        return result
+    }
+
     fun frequencySpectrum(array: Array<Float>): Array<Float> {
         // FFT needs DoubleArray Type
         val doubleArray = DoubleArray(array.size) { array[it].toDouble() }
 
-        // padding 0 for make array size to power of 2
-        var size = 1
-        while (size < array.size) size *= 2
-        val paddedDoubleArray = DoubleArray(size)
-
-        System.arraycopy(doubleArray, 0, paddedDoubleArray, 0, array.size)
-
-        // Create FFT instance
-        val transformer = FastFourierTransformer(DftNormalization.STANDARD)
-
-        // Perform FFT
-        val fft = transformer.transform(paddedDoubleArray, TransformType.FORWARD)
+        // perform FFT
+        val fftResultDouble = fft(doubleArray)
+        val fftResult = Array(array.size * 2) { fftResultDouble[it].toFloat() }
 
         // Calculate frequency spectrum
-        val freqSpec = fft
-            .drop(1)    //  exclude index 0
-            .map { it.abs() }
+        val freqSpec = fftResult
+            .drop(2)    //  exclude index 0
+
+        val result = Array(array.size - 1) { 0.0f }
+        for(i in 0 until freqSpec.size/2) {
+            result[i] = sqrt(freqSpec[i*2].pow(2) + freqSpec[i*2+1].pow(2))
+        }
 
         // resize the result and return
-        return freqSpec.map { it.toFloat() }.toTypedArray().sliceArray(0..array.size - 2)
+        return result
+    }
+
+    fun entropy(array: Array<Float>): Float {
+
+        val sum = array.sum()
+        if(sum == 0.0f) return 0.0f
+
+        return -array.sumOf { (it / sum) * ln((it / sum).toDouble()) }.toFloat()
+    }
+
+    fun energy(array: Array<Float>): Float {
+        var squareSum = 0.0f
+        for(f in array) squareSum += f*f
+        return squareSum / array.size
     }
 }
