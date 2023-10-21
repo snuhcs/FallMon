@@ -9,7 +9,7 @@ map_functions = {
 }
 
 def wrong_usage():
-    print(f"usage: python port.py {'|'.join(map_functions.keys())} [-o filename]")
+    print(f"usage: python port.py {'|'.join(map_functions.keys())} [-o filename] [-i path]")
     exit()
 
 if __name__ == "__main__":
@@ -17,7 +17,8 @@ if __name__ == "__main__":
         wrong_usage()
 
     mode = sys.argv[1]
-    filename = 'output.' + mode
+    filename = 'Model.' + mode
+    model_path = 'model.pkl'
 
     if '-o' in sys.argv:
         fflag_idx = sys.argv.index('-o')
@@ -26,7 +27,14 @@ if __name__ == "__main__":
         else:
             filename = sys.argv[fflag_idx + 1]
 
-    with open('test_model.pkl', 'rb') as pkl:
+    if '-i' in sys.argv:
+        fflag_idx = sys.argv.index('-i')
+        if len(sys.argv) <= fflag_idx + 1:
+            wrong_usage()
+        else:
+            model_path = sys.argv[fflag_idx + 1]
+
+    with open(model_path, 'rb') as pkl:
         print("Loading pickle file...", end="")
         rf: RandomForestClassifier = pickle.load(pkl)  # 미리 학습된 테스트용 객체
         print(" Done.")

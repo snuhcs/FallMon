@@ -6,22 +6,24 @@
 
 package com.example.fallmon.presentation
 
-import android.annotation.SuppressLint
-import android.content.Context.*
 import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import android.os.Bundle
+import android.util.Log
 import android.widget.TextView
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.wear.compose.material.MaterialTheme
@@ -29,7 +31,8 @@ import androidx.wear.compose.material.Text
 import com.example.fallmon.R
 import com.example.fallmon.presentation.theme.FallMonTheme
 import com.example.fallmon.presentation.math.FallMonMath as FMath
-
+import com.example.fallmon.presentation.Model
+typealias FeatureExtractor = (Array<Float>) -> Float
 
 class MainActivity : ComponentActivity(), SensorEventListener {
 
@@ -46,6 +49,7 @@ class MainActivity : ComponentActivity(), SensorEventListener {
     private var sensor_window_transpose = Array(3) { Array(WINDOW_SIZE) { 0.0f } }
     private var window_index: Int = 0
 
+    // type alias
     /* Constructor */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -56,7 +60,7 @@ class MainActivity : ComponentActivity(), SensorEventListener {
 
     /* Set up sensor when the app starts */
     private fun setUpSensor(){
-        sensorManager = getSystemService(SENSOR_SERVICE) as SensorManager
+        sensorManager = getSystemService(android.content.Context.SENSOR_SERVICE) as android.hardware.SensorManager
         mAccelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)?.also{
             sensorManager.registerListener(
                 this,
@@ -92,91 +96,45 @@ class MainActivity : ComponentActivity(), SensorEventListener {
         }
     }
 
-    @SuppressLint("SetTextI18n")
     private fun sensorWindowFulled() {
-
-        sensor_window_transpose = Array(3) { Array(WINDOW_SIZE) { 0.0f } }
+        sensor_window_transpose = Array(3, {Array<Float>(WINDOW_SIZE, {0.0f})})
 
         for(i: Int in 0 until 3)
             for(j: Int in 0 until WINDOW_SIZE)
-                sensor_window_transpose[i][j] = (i+1)*(j+1).toFloat()
+                sensor_window_transpose[i][j] = sensor_window[j][i]
 
-        val xAverage = sensor_window_transpose[0].average().toFloat()
-        val yAverage = sensor_window_transpose[1].average().toFloat()
-        val zAverage = sensor_window_transpose[2].average().toFloat()
+        // features used in classification model
+        // redundant calculations(average, standardDeviation) exist
+        val average:FeatureExtractor = {v -> v.average().toFloat()}
+        val standardDeviation:FeatureExtractor = {v -> FMath.standardDeviation(v, average(v))}
+        val rootMinSquare:FeatureExtractor = {v -> FMath.rootMeanSquare(v)}
+        val maxAmplitude:FeatureExtractor = {v -> FMath.maxAmplitude(v)}
+        val minAmplitude:FeatureExtractor = {v -> FMath.minAmplitude(v)}
+        val median:FeatureExtractor = {v -> FMath.median(v)}
+        val nzc:FeatureExtractor = {v -> FMath.nzc(v)}
+        val skewness:FeatureExtractor = {v -> FMath.skewness(v, average(v), standardDeviation(v))}
+        val kurtosis:FeatureExtractor = {v -> FMath.kurtosis(v, average(v), standardDeviation(v))}
+        val percentile1:FeatureExtractor = {v -> FMath.percentile1(v)}
+        val percentile3:FeatureExtractor = {v -> FMath.percentile3(v)}
+        val freqAverage:FeatureExtractor = {v -> FMath.frequencySpectrum(v).average().toFloat()}
+        val freqMedian:FeatureExtractor = {v -> FMath.median(v)}
+        val zero:FeatureExtractor = {_ -> 0.0F}
 
-        val xStandardDeviation = FMath.standardDeviation(sensor_window_transpose[0], xAverage)
-        val yStandardDeviation = FMath.standardDeviation(sensor_window_transpose[1], yAverage)
-        val zStandardDeviation = FMath.standardDeviation(sensor_window_transpose[2], zAverage)
-
-        val xRootMeanSquare = FMath.rootMeanSquare(sensor_window_transpose[0])
-        val yRootMeanSquare = FMath.rootMeanSquare(sensor_window_transpose[1])
-        val zRootMeanSquare = FMath.rootMeanSquare(sensor_window_transpose[2])
-
-        val xMaxAmplitude = FMath.maxAmplitude(sensor_window_transpose[0])
-        val yMaxAmplitude = FMath.maxAmplitude(sensor_window_transpose[1])
-        val zMaxAmplitude = FMath.maxAmplitude(sensor_window_transpose[2])
-
-        val xMinAmplitude = FMath.minAmplitude(sensor_window_transpose[0])
-        val yMinAmplitude = FMath.minAmplitude(sensor_window_transpose[1])
-        val zMinAmplitude = FMath.minAmplitude(sensor_window_transpose[2])
-
-        val xMedian = FMath.median(sensor_window_transpose[0])
-        val yMedian = FMath.median(sensor_window_transpose[1])
-        val zMedian = FMath.median(sensor_window_transpose[2])
-
-        val xNZC = FMath.nzc(sensor_window_transpose[0])
-        val yNZC = FMath.nzc(sensor_window_transpose[1])
-        val zNZC = FMath.nzc(sensor_window_transpose[2])
-
-        val xSkewness = FMath.skewness(sensor_window_transpose[0], xAverage, xStandardDeviation)
-        val ySkewness = FMath.skewness(sensor_window_transpose[1], yAverage, yStandardDeviation)
-        val zSkewness = FMath.skewness(sensor_window_transpose[2], zAverage, zStandardDeviation)
-
-        val xKurtosis = FMath.kurtosis(sensor_window_transpose[0], xAverage, xStandardDeviation)
-        val yKurtosis = FMath.kurtosis(sensor_window_transpose[1], yAverage, yStandardDeviation)
-        val zKurtosis = FMath.kurtosis(sensor_window_transpose[2], zAverage, zStandardDeviation)
-
-        val xPercentile1 = FMath.percentile1(sensor_window_transpose[0])
-        val yPercentile1 = FMath.percentile1(sensor_window_transpose[1])
-        val zPercentile1 = FMath.percentile1(sensor_window_transpose[2])
-
-        val xPercentile3 = FMath.percentile3(sensor_window_transpose[0])
-        val yPercentile3 = FMath.percentile3(sensor_window_transpose[1])
-        val zPercentile3 = FMath.percentile3(sensor_window_transpose[2])
-
-        val xFreq = FMath.frequencySpectrum(sensor_window_transpose[0])
-        val yFreq = FMath.frequencySpectrum(sensor_window_transpose[1])
-        val zFreq = FMath.frequencySpectrum(sensor_window_transpose[2])
-
-        val xFreqAverage = xFreq.average().toFloat()
-        val yFreqAverage = yFreq.average().toFloat()
-        val zFreqAverage = zFreq.average().toFloat()
-
-        val xFreqMedian = FMath.median(xFreq)
-        val yFreqMedian = FMath.median(yFreq)
-        val zFreqMedian = FMath.median(zFreq)
-
-        // below two functions would be fixed
-        val xEntropy = FMath.entropy(xFreq)
-        val yEntropy = FMath.entropy(yFreq)
-        val zEntropy = FMath.entropy(zFreq)
-
-        val xEnergy = FMath.energy(xFreq)
-        val yEnergy = FMath.energy(yFreq)
-        val zEnergy = FMath.energy(zFreq)
-
-        text_square.text = """${window_index}
-            |x: ${xAverage}, ${xStandardDeviation}, ${xRootMeanSquare}, ${xMaxAmplitude}, ${xMinAmplitude}, ${xMedian}, ${xNZC}, ${xSkewness}, ${xKurtosis}, ${xPercentile1}, ${xPercentile3}, ${xFreqAverage}, ${xFreqMedian}, ${xEntropy}, ${xEnergy}
+        val featureExtractors :Array<FeatureExtractor> = arrayOf(average, standardDeviation,
+            rootMinSquare, maxAmplitude, minAmplitude, median, nzc, skewness, kurtosis, percentile1,
+            percentile3, freqAverage, freqMedian, zero, zero)
+        assert(featureExtractors.size == 15)
+        val features: Array<Float> = featureExtractors.map{f -> sensor_window_transpose.map{v -> f(v)}}.flatten().toTypedArray()
+        val score = Model.score(features.map {t -> t.toDouble()}.toDoubleArray())
+        val featureText = """${window_index}
+            |score: ${score[0]} ${score[1]}
+            |x: ${features.filterIndexed{i, _ -> i % 3 == 0}.joinToString(limit=5, transform = {x-> "%.2f".format(x)})}
+            |y: ${features.filterIndexed{i, _ -> i % 3 == 1}.joinToString(limit=5, transform = {x-> "%.2f".format(x)})}
+            |z: ${features.filterIndexed{i, _ -> i % 3 == 2}.joinToString(limit=5, transform = {x-> "%.2f".format(x)})}
             |""".trimMargin()
-        /*
-        text_square.text = """${window_index}
-            |x: ${xAverage}, ${xStandardDeviation}, ${xRootMeanSquare}, ${xMaxAmplitude}, ${xMinAmplitude}, ${xMedian}, ${xNZC}, ${xSkewness}, ${xKurtosis}, ${xPercentile1}, ${xPercentile3}, ${xFreqAverage}, ${xFreqMedian}, ${xEntropy}, ${xEnergy}
-            |y: ${yAverage}, ${yStandardDeviation}, ${yRootMeanSquare}, ${yMaxAmplitude}, ${yMinAmplitude}, ${yMedian}, ${yNZC}, ${ySkewness}, ${yKurtosis}, ${yPercentile1}, ${yPercentile3}, ${yFreqAverage}, ${yFreqMedian}, ${yEntropy}, ${yEnergy}
-            |z: ${zAverage}, ${zStandardDeviation}, ${zRootMeanSquare}, ${zMaxAmplitude}, ${zMinAmplitude}, ${zMedian}, ${zNZC}, ${zSkewness}, ${zKurtosis}, ${zPercentile1}, ${zPercentile3}, ${zFreqAverage}, ${zFreqMedian}, ${zEntropy}, ${zEnergy}
-            |""".trimMargin()
-
-         */
+        Log.d("score", score.joinToString { x -> x.toString() })
+        Log.d("Features", featureText)
+        text_square.text = featureText
     }
 
 
@@ -208,7 +166,7 @@ fun SensorData(v1: Float, v2: Float, v3: Float) {
 
 
 @Composable
-fun WearApp() {
+fun WearApp(greetingName: String) {
     FallMonTheme {
         /* If you have enough items in your list, use [ScalingLazyColumn] which is an optimized
          * version of LazyColumn for wear devices with some added features. For more information,
@@ -220,13 +178,23 @@ fun WearApp() {
                 .background(MaterialTheme.colors.background),
             verticalArrangement = Arrangement.Center
         ) {
-            SensorData(0f, 0f , 0f)
+            Greeting(greetingName = greetingName)
         }
     }
+}
+
+@Composable
+fun Greeting(greetingName: String) {
+    Text(
+        modifier = Modifier.fillMaxWidth(),
+        textAlign = TextAlign.Center,
+        color = MaterialTheme.colors.primary,
+        text = stringResource(R.string.hello_world, greetingName)
+    )
 }
 
 @Preview(device = Devices.WEAR_OS_SMALL_ROUND, showSystemUi = true)
 @Composable
 fun DefaultPreview() {
-    WearApp()
+    WearApp("Preview Android")
 }

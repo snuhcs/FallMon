@@ -37,21 +37,22 @@ $ . ./.venv/bin/activate
 Java 파일 생성
 
 ```bash
-python port.py java -o Model.java
+python port.py java -o Model.java -i model.pkl
 ```
 
 C 파일 생성
 
 ```bash
-python port.py c -o model.c
+python port.py c -o model.c -i model.pkl
 ```
 
 ### Input file 설정
 
-Input file의 이름은 반드시 `test_model.pkl`이어야 하며, `scikit-learn.ensemble.RandomForest` 객체가 저장되어 있어야 합니다.
-
-Input file의 형식이나 이름을 설정하는 것은 아직 구현이 되지 않은 상태이며, 현재는 필요에 따라 직접 파이썬 스크립트를 수정하면 되겠습니다.
+-i 옵션을 이용해 `.pkl`파일의 경로를 전달합니다. 
+`.pkl` 파일에는 `scikit-learn.ensemble.RandomForest` 객체가 저장되어 있어야 합니다.
 
 ## 기타 사항
 
 Random forest 특성상 코드의 길이가 매우 길어질 수 있기 때문에, 성능이 저조하면 추후에 최적화 작업을 진행할 때 Java나 Kotlin보다는 C로 변환한 다음 dynamic linking을 하는 방법을 생각해볼 수 있겠습니다.
+
+Model.java를 src/main/java에 복사하여 사용합니다. 추후에 자동화할 수 있습니다.
