@@ -14,7 +14,6 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.TextView
 import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -31,7 +30,6 @@ import androidx.wear.compose.material.Text
 import com.example.fallmon.R
 import com.example.fallmon.presentation.theme.FallMonTheme
 import com.example.fallmon.presentation.math.FallMonMath as FMath
-import com.example.fallmon.presentation.Model
 typealias FeatureExtractor = (Array<Float>) -> Float
 
 class MainActivity : ComponentActivity(), SensorEventListener {
@@ -118,11 +116,12 @@ class MainActivity : ComponentActivity(), SensorEventListener {
         val percentile3:FeatureExtractor = {v -> FMath.percentile3(v)}
         val freqAverage:FeatureExtractor = {v -> FMath.frequencySpectrum(v).average().toFloat()}
         val freqMedian:FeatureExtractor = {v -> FMath.median(v)}
-        val zero:FeatureExtractor = {_ -> 0.0F}
+        val freqEntropy:FeatureExtractor = {v -> FMath.entropy(v)}
+        val freqEnergy:FeatureExtractor = {v -> FMath.energy(v)}
 
         val featureExtractors :Array<FeatureExtractor> = arrayOf(average, standardDeviation,
             rootMinSquare, maxAmplitude, minAmplitude, median, nzc, skewness, kurtosis, percentile1,
-            percentile3, freqAverage, freqMedian, zero, zero)
+            percentile3, freqAverage, freqMedian, freqEntropy, freqEnergy)
         assert(featureExtractors.size == 15)
         val features: Array<Float> = featureExtractors.map{f -> sensor_window_transpose.map{v -> f(v)}}.flatten().toTypedArray()
         val score = Model.score(features.map {t -> t.toDouble()}.toDoubleArray())
