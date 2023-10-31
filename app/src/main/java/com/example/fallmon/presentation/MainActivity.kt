@@ -115,9 +115,9 @@ class MainActivity : ComponentActivity(), SensorEventListener {
         val percentile1:FeatureExtractor = {v -> FMath.percentile1(v)}
         val percentile3:FeatureExtractor = {v -> FMath.percentile3(v)}
         val freqAverage:FeatureExtractor = {v -> FMath.frequencySpectrum(v).average().toFloat()}
-        val freqMedian:FeatureExtractor = {v -> FMath.median(v)}
-        val freqEntropy:FeatureExtractor = {v -> FMath.entropy(v)}
-        val freqEnergy:FeatureExtractor = {v -> FMath.energy(v)}
+        val freqMedian:FeatureExtractor = {v -> FMath.median(FMath.frequencySpectrum(v))}
+        val freqEntropy:FeatureExtractor = {v -> FMath.entropy(FMath.frequencySpectrum(v))}
+        val freqEnergy:FeatureExtractor = {v -> FMath.energy(FMath.frequencySpectrum(v))}
 
         val featureExtractors :Array<FeatureExtractor> = arrayOf(average, standardDeviation,
             rootMinSquare, maxAmplitude, minAmplitude, median, nzc, skewness, kurtosis, percentile1,
