@@ -33,6 +33,7 @@ import com.example.fallmon.R
 import com.example.fallmon.presentation.theme.FallMonTheme
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import com.example.fallmon.presentation.Feature as Feature
 
 class MainActivity : ComponentActivity(), SensorEventListener {
 
@@ -68,7 +69,7 @@ class MainActivity : ComponentActivity(), SensorEventListener {
 
     /* Set up sensor when the app starts */
     private fun setUpSensor(){
-        sensorManager = getSystemService(android.content.Context.SENSOR_SERVICE) as SensorManager
+        sensorManager = getSystemService(android.content.Context.SENSOR_SERVICE) as android.hardware.SensorManager
         mAccelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)?.also{
             sensorManager.registerListener(
                 this,
