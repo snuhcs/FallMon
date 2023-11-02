@@ -33,8 +33,6 @@ import com.example.fallmon.R
 import com.example.fallmon.presentation.theme.FallMonTheme
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
-import com.example.fallmon.presentation.math.FallMonMath as FMath
-typealias FeatureExtractor = (Array<Float>) -> Float
 
 class MainActivity : ComponentActivity(), SensorEventListener {
 
@@ -113,27 +111,9 @@ class MainActivity : ComponentActivity(), SensorEventListener {
             for(j: Int in 0 until WINDOW_SIZE)
                 sensor_window_transpose[i][j] = sensor_window[j][i]
 
-        // features used in classification model
-        // redundant calculations(average, standardDeviation) exist
-        val average:FeatureExtractor = {v -> v.average().toFloat()}
-        val standardDeviation:FeatureExtractor = {v -> FMath.standardDeviation(v, average(v))}
-        val rootMinSquare:FeatureExtractor = {v -> FMath.rootMeanSquare(v)}
-        val maxAmplitude:FeatureExtractor = {v -> FMath.maxAmplitude(v)}
-        val minAmplitude:FeatureExtractor = {v -> FMath.minAmplitude(v)}
-        val median:FeatureExtractor = {v -> FMath.median(v)}
-        val nzc:FeatureExtractor = {v -> FMath.nzc(v)}
-        val skewness:FeatureExtractor = {v -> FMath.skewness(v, average(v), standardDeviation(v))}
-        val kurtosis:FeatureExtractor = {v -> FMath.kurtosis(v, average(v), standardDeviation(v))}
-        val percentile1:FeatureExtractor = {v -> FMath.percentile1(v)}
-        val percentile3:FeatureExtractor = {v -> FMath.percentile3(v)}
-        val freqAverage:FeatureExtractor = {v -> FMath.frequencySpectrum(v).average().toFloat()}
-        val freqMedian:FeatureExtractor = {v -> FMath.median(FMath.frequencySpectrum(v))}
-        val freqEntropy:FeatureExtractor = {v -> FMath.entropy(FMath.frequencySpectrum(v))}
-        val freqEnergy:FeatureExtractor = {v -> FMath.energy(FMath.frequencySpectrum(v))}
-
-        val featureExtractors :Array<FeatureExtractor> = arrayOf(average, standardDeviation,
-            rootMinSquare, maxAmplitude, minAmplitude, median, nzc, skewness, kurtosis, percentile1,
-            percentile3, freqAverage, freqMedian, freqEntropy, freqEnergy)
+        val featureExtractors :Array<FeatureExtractor> = arrayOf(Feature.average, Feature.standardDeviation,
+            Feature.rootMinSquare, Feature.maxAmplitude, Feature.minAmplitude, Feature.median, Feature.nzc, Feature.skewness, Feature.kurtosis, Feature.percentile1,
+            Feature.percentile3, Feature.freqAverage, Feature.freqMedian, Feature.freqEntropy, Feature.freqEnergy)
         assert(featureExtractors.size == 15)
         val features: Array<Float> = featureExtractors.map{f -> sensor_window_transpose.map{v -> f(v)}}.flatten().toTypedArray()
         val score = Model.score(features.map {t -> t.toDouble()}.toDoubleArray())
@@ -230,9 +210,7 @@ class MainActivity : ComponentActivity(), SensorEventListener {
 
         Log.d("fallDetectedUI", featureText)
 
-        text_square.text = featureText
     }
-
 
 
 
