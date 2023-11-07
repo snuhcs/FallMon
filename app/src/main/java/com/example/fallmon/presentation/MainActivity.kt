@@ -10,12 +10,10 @@ import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
-import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.widget.TextView
 import androidx.activity.ComponentActivity
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -31,9 +29,8 @@ import androidx.wear.compose.material.MaterialTheme
 import androidx.wear.compose.material.Text
 import com.example.fallmon.R
 import com.example.fallmon.presentation.theme.FallMonTheme
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
-import com.example.fallmon.presentation.Feature as Feature
+import com.example.fallmon.presentation.math.FallMonMath as FMath
+typealias FeatureExtractor = (Array<Float>) -> Float
 
 class MainActivity : ComponentActivity(), SensorEventListener {
 
@@ -49,14 +46,6 @@ class MainActivity : ComponentActivity(), SensorEventListener {
     private var sensor_window = Array(WINDOW_SIZE) { Array(3) { 0.0f } }
     private var sensor_window_transpose = Array(3) { Array(WINDOW_SIZE) { 0.0f } }
     private var window_index: Int = 0
-
-    // detection data class
-    data class Detection(val type: String, val time: String) {
-        val detectionType = type
-        val detectionTime = time
-    }
-
-    private var detectedFallArray: MutableList<Detection> = mutableListOf()
 
     // type alias
     /* Constructor */
@@ -112,105 +101,41 @@ class MainActivity : ComponentActivity(), SensorEventListener {
             for(j: Int in 0 until WINDOW_SIZE)
                 sensor_window_transpose[i][j] = sensor_window[j][i]
 
-        val featureExtractors :Array<FeatureExtractor> = arrayOf(Feature.average, Feature.standardDeviation,
-            Feature.rootMinSquare, Feature.maxAmplitude, Feature.minAmplitude, Feature.median, Feature.nzc, Feature.skewness, Feature.kurtosis, Feature.percentile1,
-            Feature.percentile3, Feature.freqAverage, Feature.freqMedian, Feature.freqEntropy, Feature.freqEnergy)
+        // features used in classification model
+        // redundant calculations(average, standardDeviation) exist
+        val average:FeatureExtractor = {v -> v.average().toFloat()}
+        val standardDeviation:FeatureExtractor = {v -> FMath.standardDeviation(v, average(v))}
+        val rootMinSquare:FeatureExtractor = {v -> FMath.rootMeanSquare(v)}
+        val maxAmplitude:FeatureExtractor = {v -> FMath.maxAmplitude(v)}
+        val minAmplitude:FeatureExtractor = {v -> FMath.minAmplitude(v)}
+        val median:FeatureExtractor = {v -> FMath.median(v)}
+        val nzc:FeatureExtractor = {v -> FMath.nzc(v)}
+        val skewness:FeatureExtractor = {v -> FMath.skewness(v, average(v), standardDeviation(v))}
+        val kurtosis:FeatureExtractor = {v -> FMath.kurtosis(v, average(v), standardDeviation(v))}
+        val percentile1:FeatureExtractor = {v -> FMath.percentile1(v)}
+        val percentile3:FeatureExtractor = {v -> FMath.percentile3(v)}
+        val freqAverage:FeatureExtractor = {v -> FMath.frequencySpectrum(v).average().toFloat()}
+        val freqMedian:FeatureExtractor = {v -> FMath.median(FMath.frequencySpectrum(v))}
+        val freqEntropy:FeatureExtractor = {v -> FMath.entropy(FMath.frequencySpectrum(v))}
+        val freqEnergy:FeatureExtractor = {v -> FMath.energy(FMath.frequencySpectrum(v))}
+
+        val featureExtractors :Array<FeatureExtractor> = arrayOf(average, standardDeviation,
+            rootMinSquare, maxAmplitude, minAmplitude, median, nzc, skewness, kurtosis, percentile1,
+            percentile3, freqAverage, freqMedian, freqEntropy, freqEnergy)
         assert(featureExtractors.size == 15)
         val features: Array<Float> = featureExtractors.map{f -> sensor_window_transpose.map{v -> f(v)}}.flatten().toTypedArray()
         val score = Model.score(features.map {t -> t.toDouble()}.toDoubleArray())
-
-        fallDetectUI(score)
-
+        val classificationResult = ClassificationModel.score(features.map{t -> t.toDouble()}.toDoubleArray())
         val featureText = """${window_index}
             |score: ${score[0]} ${score[1]}
+            |classification: ${classificationResult[0]} ${classificationResult[1]} ${classificationResult[2]} ${classificationResult[3]} ${classificationResult[4]}
             |x: ${features.filterIndexed{i, _ -> i % 3 == 0}.joinToString(limit=5, transform = {x-> "%.2f".format(x)})}
             |y: ${features.filterIndexed{i, _ -> i % 3 == 1}.joinToString(limit=5, transform = {x-> "%.2f".format(x)})}
             |z: ${features.filterIndexed{i, _ -> i % 3 == 2}.joinToString(limit=5, transform = {x-> "%.2f".format(x)})}
             |""".trimMargin()
-
-        //text_square.text = featureText
-
         Log.d("score", score.joinToString { x -> x.toString() })
         Log.d("Features", featureText)
-    }
-
-
-
-    /*
-        UI functions: can be moved to other package
-     */
-
-    private fun fallDetectUI(score: DoubleArray) {
-        val maxScore = score.max()
-
-        if(detectedFallArray.size > 0) recentFallDetectionUI()
-        else if(score[0] == maxScore) idleUI()
-        else if(score[1] == maxScore) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                fallDetectedUI("단순 낙상")
-            } else {
-                // Old OS version
-                // TODO: Can be replaced with other Method to get now time
-                fallDetectedUIwithoutTime("단순 낙상")
-            }
-        }
-        else idleUI()
-    }
-
-    private fun recentFallDetectionUI() {
-        val featureText = """ 최근 감지된 낙상 의심 건:
-            |${detectedFallArray[0].detectionTime}
-            |${detectedFallArray[0].detectionType}
-        """.trimMargin()
-
-        // want to add buttons to check
-
-        Log.d("recentFallDetection", featureText)
-
         text_square.text = featureText
-    }
-
-    private fun idleUI() {
-        val featureText = """낙상이 감지되지 않았습니다.""".trimMargin()
-
-        Log.d("idleUI", featureText)
-
-        text_square.text = featureText
-    }
-
-    @RequiresApi(Build.VERSION_CODES.O)
-    private fun fallDetectedUI(fallType: String) {
-
-        val fallTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
-
-        val fall = Detection(fallType, fallTime)
-        detectedFallArray.add(fall)
-
-        val featureText = """낙상 의심!!
-            | ${fallType}
-            | ${fallTime}
-        """.trimMargin()
-
-        Log.d("fallDetectedUI", featureText)
-
-        text_square.text = featureText
-    }
-
-    // TODO: This function can be removed after changing method to check now time
-    private fun fallDetectedUIwithoutTime(fallType: String) {
-
-        val fallTime = "OS 버전이 낮아 확인할 수 없습니다."
-
-        val fall = Detection(fallType, fallTime)
-        detectedFallArray.add(fall)
-
-        val featureText = """낙상 의심!!
-            | ${fallType}
-            | ${fallTime}
-        """.trimMargin()
-
-        Log.d("fallDetectedUI", featureText)
-
     }
 
 
