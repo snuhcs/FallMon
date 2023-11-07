@@ -125,8 +125,10 @@ class MainActivity : ComponentActivity(), SensorEventListener {
         assert(featureExtractors.size == 15)
         val features: Array<Float> = featureExtractors.map{f -> sensor_window_transpose.map{v -> f(v)}}.flatten().toTypedArray()
         val score = Model.score(features.map {t -> t.toDouble()}.toDoubleArray())
+        val classificationResult = ClassificationModel.score(features.map{t -> t.toDouble()}.toDoubleArray())
         val featureText = """${window_index}
             |score: ${score[0]} ${score[1]}
+            |classification: ${classificationResult[0]} ${classificationResult[1]} ${classificationResult[2]} ${classificationResult[3]} ${classificationResult[4]}
             |x: ${features.filterIndexed{i, _ -> i % 3 == 0}.joinToString(limit=5, transform = {x-> "%.2f".format(x)})}
             |y: ${features.filterIndexed{i, _ -> i % 3 == 1}.joinToString(limit=5, transform = {x-> "%.2f".format(x)})}
             |z: ${features.filterIndexed{i, _ -> i % 3 == 2}.joinToString(limit=5, transform = {x-> "%.2f".format(x)})}
