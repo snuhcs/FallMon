@@ -30,7 +30,6 @@ import androidx.wear.compose.material.Text
 import com.example.fallmon.R
 import com.example.fallmon.presentation.theme.FallMonTheme
 import com.example.fallmon.presentation.math.FallMonMath as FMath
-typealias FeatureExtractor = (Array<Float>) -> Float
 
 class MainActivity : ComponentActivity(), SensorEventListener {
 
@@ -128,7 +127,7 @@ class MainActivity : ComponentActivity(), SensorEventListener {
         val classificationResult = ClassificationModel.score(features.map{t -> t.toDouble()}.toDoubleArray())
         val featureText = """${window_index}
             |score: ${score[0]} ${score[1]}
-            |classification: ${classificationResult[0]} ${classificationResult[1]} ${classificationResult[2]} ${classificationResult[3]} ${classificationResult[4]}
+            |class: ${classificationResult[0]} ${classificationResult[1]} ${classificationResult[2]} ${classificationResult[3]} ${classificationResult[4]}
             |x: ${features.filterIndexed{i, _ -> i % 3 == 0}.joinToString(limit=5, transform = {x-> "%.2f".format(x)})}
             |y: ${features.filterIndexed{i, _ -> i % 3 == 1}.joinToString(limit=5, transform = {x-> "%.2f".format(x)})}
             |z: ${features.filterIndexed{i, _ -> i % 3 == 2}.joinToString(limit=5, transform = {x-> "%.2f".format(x)})}

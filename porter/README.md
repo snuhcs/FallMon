@@ -38,7 +38,7 @@ Java 파일 생성
 
 ```bash
 python port.py java -o Model.java -i model.pkl
-python port.py java -o ClassificationModel.java -i calssification_model.pkl
+python port.py java -o ClassificationModel.java -i classification_model.pkl
 ```
 
 C 파일 생성
