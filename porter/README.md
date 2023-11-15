@@ -38,14 +38,14 @@ Java 파일 생성
 
 ```bash
 python port.py java -o Model.java -i model.pkl
-python port.py java -o ClassificationModel.java -i calssification_model.pkl
+python port.py java -o ClassificationModel.java -i classification_model.pkl
 ```
 
 C 파일 생성
 
 ```bash
 python port.py c -o model.c -i model.pkl
-python port.py c -o ClassificationModel.c -i calssification_model.pkl
+python port.py c -o ClassificationModel.c -i classification_model.pkl
 ```
 
 ### Input file 설정
@@ -57,4 +57,4 @@ python port.py c -o ClassificationModel.c -i calssification_model.pkl
 
 Random forest 특성상 코드의 길이가 매우 길어질 수 있기 때문에, 성능이 저조하면 추후에 최적화 작업을 진행할 때 Java나 Kotlin보다는 C로 변환한 다음 dynamic linking을 하는 방법을 생각해볼 수 있겠습니다.
 
-Java로 포팅하는 경우, MainActivity.kt이 위치한 디렉토리에도 포팅된 파일을 저장합니다.
+Model.java를 src/main/java에 복사하여 사용합니다. 추후에 자동화할 수 있습니다.
