@@ -1,0 +1,4 @@
+<resources>
+    <string name="sensor_data">x: %1$s y: %2$s x: %3$s</string>
+    <string name="hello_world">From the Round world,\nHello, %1$s!</string>
+</resources>
