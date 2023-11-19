@@ -6,6 +6,7 @@
 
 package com.example.fallmon.presentation
 
+import android.content.Intent
 import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
@@ -120,7 +121,13 @@ class MainActivity : ComponentActivity(), SensorEventListener {
         val score = Model.score(features.map {t -> t.toDouble()}.toDoubleArray())
         val classificationResult = ClassificationModel.score(features.map{t -> t.toDouble()}.toDoubleArray())
 
-        fallDetectUI(score)
+        // test second activity
+        if(score[1] == score.max()) {
+            val intent = Intent(this, DetectedActivity::class.java)
+            startActivity(intent)
+        }
+        ///////////////////////////
+        //fallDetectUI(score)
 
         val featureText = """${window_index}
             |score: ${score[0]} ${score[1]}
