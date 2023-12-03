@@ -41,6 +41,13 @@
             android:theme="@android:style/Theme.DeviceDefault">
 
         </activity>
+
+        <activity
+            android:name=".presentation.ConfirmedActivity"
+            android:exported="true"
+            android:theme="@android:style/Theme.DeviceDefault">
+
+        </activity>
     </application>
 
 </manifest>

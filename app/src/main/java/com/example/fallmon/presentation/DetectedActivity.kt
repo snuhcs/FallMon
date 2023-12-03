@@ -1,17 +1,29 @@
 package com.example.fallmon.presentation
 
+import android.app.Activity
+import android.content.Intent
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.view.Gravity
 import android.widget.ImageButton
 import android.widget.TextView
 import androidx.activity.ComponentActivity
+import androidx.activity.result.contract.ActivityResultContracts
 import com.example.fallmon.R
 
 class DetectedActivity : ComponentActivity() {
 
     private lateinit var countDownTimer: CountDownTimer
     private val totalTimeInMillis: Long = 20000  // 20 seconds
+
+    private val getActivityResult = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+        if(it.resultCode == RESULT_OK) {
+            val resultIntent = Intent()
+            resultIntent.putExtra("confirmed", true)
+            setResult(Activity.RESULT_OK, resultIntent)
+            finish()
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -42,14 +54,14 @@ class DetectedActivity : ComponentActivity() {
 
         countDown()
 
-        // Assume you have buttons with IDs 'functionButton1' and 'functionButton2'
         confirmButton.setOnClickListener {
-            // Add functionality for button 1
             confirmed()
         }
 
         disconfirmButton.setOnClickListener {
-            // Add functionality for button 2
+            val resultIntent = Intent()
+            resultIntent.putExtra("confirmed", false)
+            setResult(Activity.RESULT_OK, resultIntent)
             finish()
         }
     }
@@ -72,8 +84,8 @@ class DetectedActivity : ComponentActivity() {
     }
 
     private fun confirmed() {
-
-        finish()
+        val intent = Intent(this, ConfirmedActivity::class.java)
+        getActivityResult.launch(intent)
     }
 
     override fun onDestroy() {

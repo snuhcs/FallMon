@@ -16,6 +16,7 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.TextView
 import androidx.activity.ComponentActivity
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -51,6 +52,13 @@ class MainActivity : ComponentActivity(), SensorEventListener {
     private var window_index: Int = 0
 
     private var intented: Boolean = false
+
+    // to get result from DetectedActivity
+    private val getActivityResult = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+        if(it.resultCode == RESULT_OK) {
+            val confirmed = it.data?.getBooleanExtra("confirmed", false)
+        }
+    }
 
     // detection data class
     data class Detection(val type: String, val time: String) {
@@ -125,12 +133,13 @@ class MainActivity : ComponentActivity(), SensorEventListener {
         // test second activity
         if(score[1] == score.max() && !intented) {
             intented = true
+
             val intent = Intent(this, DetectedActivity::class.java)
             intent.putExtra("classificationResult", classificationResult)
-            startActivity(intent)
+            getActivityResult.launch(intent)
         }
         ///////////////////////////
-        fallDetectUI(score)
+        //fallDetectUI(score)
 
         val featureText = """${window_index}
             |score: ${score[0]} ${score[1]}
@@ -140,7 +149,7 @@ class MainActivity : ComponentActivity(), SensorEventListener {
             |z: ${features.filterIndexed{i, _ -> i % 3 == 2}.joinToString(limit=5, transform = {x-> "%.2f".format(x)})}
             |""".trimMargin()
 
-        //text_square.text = featureText
+        text_square.text = featureText
 
         Log.d("score", score.joinToString { x -> x.toString() })
         Log.d("Features", featureText)
