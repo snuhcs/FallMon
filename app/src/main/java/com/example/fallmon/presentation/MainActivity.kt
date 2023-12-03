@@ -34,7 +34,6 @@ import com.example.fallmon.R
 import com.example.fallmon.presentation.theme.FallMonTheme
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
-import com.example.fallmon.presentation.Feature as Feature
 
 class MainActivity : ComponentActivity(), SensorEventListener {
 
@@ -50,6 +49,8 @@ class MainActivity : ComponentActivity(), SensorEventListener {
     private var sensor_window = Array(WINDOW_SIZE) { Array(3) { 0.0f } }
     private var sensor_window_transpose = Array(3) { Array(WINDOW_SIZE) { 0.0f } }
     private var window_index: Int = 0
+
+    private var intented: Boolean = false
 
     // detection data class
     data class Detection(val type: String, val time: String) {
@@ -122,12 +123,14 @@ class MainActivity : ComponentActivity(), SensorEventListener {
         val classificationResult = ClassificationModel.score(features.map{t -> t.toDouble()}.toDoubleArray())
 
         // test second activity
-        if(score[1] == score.max()) {
+        if(score[1] == score.max() && !intented) {
+            intented = true
             val intent = Intent(this, DetectedActivity::class.java)
+            intent.putExtra("classificationResult", classificationResult)
             startActivity(intent)
         }
         ///////////////////////////
-        //fallDetectUI(score)
+        fallDetectUI(score)
 
         val featureText = """${window_index}
             |score: ${score[0]} ${score[1]}
