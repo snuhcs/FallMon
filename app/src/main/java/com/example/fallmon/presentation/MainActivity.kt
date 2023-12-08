@@ -151,8 +151,8 @@ class MainActivity : ComponentActivity(), SensorEventListener {
 
         text_square.text = featureText
 
-        Log.d("score", score.joinToString { x -> x.toString() })
-        Log.d("Features", featureText)
+    //  Log.d("score", score.joinToString { x -> x.toString() })
+    //  Log.d("Features", featureText)
     }
 
 
@@ -186,7 +186,7 @@ class MainActivity : ComponentActivity(), SensorEventListener {
 
         // want to add buttons to check
 
-        Log.d("recentFallDetection", featureText)
+    //  Log.d("recentFallDetection", featureText)
 
         text_square.text = featureText
     }
@@ -194,7 +194,7 @@ class MainActivity : ComponentActivity(), SensorEventListener {
     private fun idleUI() {
         val featureText = """낙상이 감지되지 않았습니다.""".trimMargin()
 
-        Log.d("idleUI", featureText)
+    //  Log.d("idleUI", featureText)
 
         text_square.text = featureText
     }
@@ -212,7 +212,7 @@ class MainActivity : ComponentActivity(), SensorEventListener {
             | ${fallTime}
         """.trimMargin()
 
-        Log.d("fallDetectedUI", featureText)
+    //  Log.d("fallDetectedUI", featureText)
 
         text_square.text = featureText
     }
@@ -230,7 +230,7 @@ class MainActivity : ComponentActivity(), SensorEventListener {
             | ${fallTime}
         """.trimMargin()
 
-        Log.d("fallDetectedUI", featureText)
+    //  Log.d("fallDetectedUI", featureText)
 
     }
 
