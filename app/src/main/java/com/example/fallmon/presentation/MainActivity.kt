@@ -11,13 +11,10 @@ import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
-import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import android.widget.TextView
 import androidx.activity.ComponentActivity
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -33,33 +30,40 @@ import androidx.wear.compose.material.MaterialTheme
 import androidx.wear.compose.material.Text
 import com.example.fallmon.R
 import com.example.fallmon.presentation.theme.FallMonTheme
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 
 class MainActivity : ComponentActivity(), SensorEventListener {
 
-    private val SAMPLING_RATE: Int = 30
-    private val WINDOW_SIZE: Int = 75
-    private val WINDOW_STRIDE: Int = 15
-
+    /*
+     * sensors / views
+     * text_square for debugging
+     */
     private lateinit var sensorManager: SensorManager
     private var mAccelerometer: Sensor ?= null
     private lateinit var text_square: TextView
 
-    // sensor_window, window_index : for sliding window
+    /*
+     * 30Hz Samples, total 75 * 3 (x,y,z) data for a window, 15 striding
+     */
+    private val SAMPLING_RATE: Int = 30
+    private val WINDOW_SIZE: Int = 75
+    private val WINDOW_STRIDE: Int = 15
+
     private var sensor_window = Array(WINDOW_SIZE) { Array(3) { 0.0f } }
     private var sensor_window_transpose = Array(3) { Array(WINDOW_SIZE) { 0.0f } }
     private var window_index: Int = 0
 
+    /*
+     * intented : check if intented DetectedActivity
+     * getActivityResult : to get result from DetectedActivity
+     */
     private var intented: Boolean = false
-
-    // to get result from DetectedActivity
     private val getActivityResult = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
         if(it.resultCode == RESULT_OK) {
             val confirmed = it.data?.getBooleanExtra("confirmed", false)
         }
     }
 
+    /* TODO : remove? or modify?
     // detection data class
     data class Detection(val type: String, val time: String) {
         val detectionType = type
@@ -67,9 +71,12 @@ class MainActivity : ComponentActivity(), SensorEventListener {
     }
 
     private var detectedFallArray: MutableList<Detection> = mutableListOf()
+     */
 
-    // type alias
-    /* Constructor */
+    /*
+     * Constructor
+     * set up textview, sensor
+     */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -77,7 +84,10 @@ class MainActivity : ComponentActivity(), SensorEventListener {
         setUpSensor()
     }
 
-    /* Set up sensor when the app starts */
+    /*
+     * Set up sensor when the app starts
+     * sampling period = 1000000 (us) / SAMPLING_RATE
+     */
     private fun setUpSensor(){
         sensorManager = getSystemService(android.content.Context.SENSOR_SERVICE) as android.hardware.SensorManager
         mAccelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)?.also{
@@ -90,13 +100,15 @@ class MainActivity : ComponentActivity(), SensorEventListener {
         }
     }
 
+    /*
+     * Run at every sensor samples data
+     * Save sensor values in window, run sensorWindowFulled() when 75 * 3 data is ready.
+     */
     override fun onSensorChanged(event: SensorEvent?) {
         if(event?.sensor?.type == Sensor.TYPE_ACCELEROMETER){
-            // Process accelerometer data
             val xAcceleration = event.values[0]
             val yAcceleration = event.values[1]
             val zAcceleration = event.values[2]
-            //text_square.text = "${window_index}  \nx: ${xAcceleration}  \ny:  ${yAcceleration}  \nz: ${zAcceleration}"
 
             sensor_window[window_index % WINDOW_SIZE][0] = xAcceleration
             sensor_window[window_index % WINDOW_SIZE][1] = yAcceleration
@@ -109,12 +121,17 @@ class MainActivity : ComponentActivity(), SensorEventListener {
 
             window_index += 1
 
+
             if(window_index % WINDOW_STRIDE == 0 && window_index >= WINDOW_SIZE) {
                 sensorWindowFulled()
             }
         }
     }
 
+    /*
+     * transpose data to 3 * 75 for getting features
+     * get scores by running model, intent DetectedActivity if fall detected
+     */
     private fun sensorWindowFulled() {
         sensor_window_transpose = Array(3, {Array<Float>(WINDOW_SIZE, {0.0f})})
 
@@ -160,7 +177,7 @@ class MainActivity : ComponentActivity(), SensorEventListener {
     /*
         UI functions: can be moved to other package
      */
-
+    /*
     private fun fallDetectUI(score: DoubleArray) {
         val maxScore = score.max()
 
@@ -235,6 +252,8 @@ class MainActivity : ComponentActivity(), SensorEventListener {
     }
 
 
+     */
+
 
     override fun onAccuracyChanged(p0: Sensor?, p1: Int) {
     }
@@ -244,6 +263,10 @@ class MainActivity : ComponentActivity(), SensorEventListener {
         super.onDestroy()
     }
 }
+
+/*
+ * below functions will be removed if unnecessary
+ */
 
 @Composable
 fun SensorData(v1: Float, v2: Float, v3: Float) {

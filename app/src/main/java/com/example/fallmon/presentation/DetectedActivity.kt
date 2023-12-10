@@ -1,9 +1,7 @@
 package com.example.fallmon.presentation
 
-import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.util.Log
@@ -25,8 +23,15 @@ import java.util.Date
 
 class DetectedActivity : ComponentActivity() {
 
+    /*
+     * for countdown automatic data sending
+     */
     private lateinit var countDownTimer: CountDownTimer
     private val totalTimeInMillis: Long = 20000  // 20 seconds
+
+    /*
+     * for data sending
+     */
     private val BaseURL: String = "http://34.22.106.16:8080"
     private val TestUserID: String = "234532"
     private val FallHistoryURL: String = "$BaseURL/api/fall_history"
@@ -38,6 +43,9 @@ class DetectedActivity : ComponentActivity() {
     }
     private lateinit var fall: FallHistory
 
+    /*
+     * put data sending was confirmed (and sended) to MainActivity & intent finish
+     */
     private val getActivityResult = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
         if(it.resultCode == RESULT_OK) {
             val resultIntent = Intent()
@@ -47,10 +55,16 @@ class DetectedActivity : ComponentActivity() {
         }
     }
 
+    /*
+     * Set layout, buttons, views
+     * get classification result from MainActivity
+     * Decide falltype by result and show them.
+     */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_detected) // Set your layout here
+        setContentView(R.layout.activity_detected)
         Log.d("Detected onCreate", "created")
+
         val confirmButton: ImageButton = findViewById(R.id.activity_detected_Confirm)
         val disconfirmButton: ImageButton = findViewById(R.id.activity_detected_Disconfirm)
         val fallText: TextView = findViewById(R.id.activity_detected_FallText)
@@ -58,11 +72,11 @@ class DetectedActivity : ComponentActivity() {
 
         val classificationResult = intent.getDoubleArrayExtra("classificationResult")
 
-        var fallType = FallType.FALL
+        var fallType = FallType.FALL    // default : simple fall
 
         fallType = when(classificationResult?.max()) {
             classificationResult?.get(0) -> FallType.DROP_ATTACK
-            //classificationResult?.get(1) -> FallType.NON_ATTACK
+            //classificationResult?.get(1) -> FallType.NON_FALL
             classificationResult?.get(2) -> FallType.SLIPPING
             classificationResult?.get(3) -> FallType.STAND_PUSH
             classificationResult?.get(4) -> FallType.SUNKEN_FLOOR
@@ -78,6 +92,12 @@ class DetectedActivity : ComponentActivity() {
         fall = FallHistory(TestUserID, fallType, Date())
         countDown()
 
+
+
+        /*
+         * confirm button : confirm the fall and send data to server
+         * disconfirm button : disconfirm the fall, not send data to server
+         */
         confirmButton.setOnClickListener {
             confirmed(fall)
         }
@@ -90,6 +110,10 @@ class DetectedActivity : ComponentActivity() {
         }
     }
 
+    /*
+     * countdown automatic data sending
+     * remaining second is continuously put in UI
+     */
     private fun countDown() {
         val timerText: TextView = findViewById(R.id.activity_detected_TimerText)
         countDownTimer = object : CountDownTimer(totalTimeInMillis, 1000) {
@@ -107,6 +131,9 @@ class DetectedActivity : ComponentActivity() {
         countDownTimer.start()
     }
 
+    /*
+     * request server to put fall data
+     */
     private fun request(fallHistory: FallHistory){
         try{
             val createdStr = SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(fallHistory.createdAt)
@@ -132,6 +159,11 @@ class DetectedActivity : ComponentActivity() {
         }
 
     }
+
+    /*
+     * run when that fall is confirmed
+     * request data sending, then intent ConfirmedActivity
+     */
     private fun confirmed(fall: FallHistory) {
         Log.d("Detected confirmed", "confirmed")
         request(fall)

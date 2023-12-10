@@ -10,7 +10,15 @@ import android.widget.TextView
 import androidx.activity.ComponentActivity
 import com.example.fallmon.R
 
+/*
+ *
+ *  This whole activity is for just showing that the fall data is successfully sent to data
+ *
+ */
+
+
 class ConfirmedActivity: ComponentActivity() {
+
     private lateinit var countDownTimer: CountDownTimer
     private val totalTimeInMillis: Long = 5000  // 5 seconds
 
