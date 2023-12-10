@@ -16,9 +16,9 @@ class ConfirmedActivity: ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_detected) // Set your layout here
+        setContentView(R.layout.activity_confirmed) // Set your layout here
 
-        val confirmButton: ImageButton = findViewById(R.id.activity_detected_Confirm)
+        val confirmButton: ImageButton = findViewById(R.id.activity_confirmed_Confirm)
 
         countDown()
 
