@@ -96,9 +96,11 @@ class MainActivity : ComponentActivity(), SensorEventListener {
      */
     override fun onSensorChanged(event: SensorEvent?) {
         if(event?.sensor?.type == Sensor.TYPE_ACCELEROMETER){
+            // Process accelerometer data
             val xAcceleration = event.values[0]
             val yAcceleration = event.values[1]
             val zAcceleration = event.values[2]
+            //text_square.text = "${window_index}  \nx: ${xAcceleration}  \ny:  ${yAcceleration}  \nz: ${zAcceleration}"
 
             sensor_window[window_index % WINDOW_SIZE][0] = xAcceleration
             sensor_window[window_index % WINDOW_SIZE][1] = yAcceleration
