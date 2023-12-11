@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-feature android:name="android.hardware.type.watch" />
 
     <application
@@ -25,6 +27,11 @@
             android:name="com.google.android.wearable.standalone"
             android:value="true" />
 
+        <service
+            android:name=".presentation.FallDetectionService"
+            android:enabled="true"
+            android:exported="false" />
+
         <activity
             android:name=".presentation.MainActivity"
             android:exported="true"
@@ -39,6 +46,7 @@
 
         <activity
             android:name=".presentation.DetectedActivity"
+            android:label="DetectedActivity"
             android:exported="true"
             android:theme="@android:style/Theme.DeviceDefault">
 

@@ -1,9 +1,15 @@
 package com.example.fallmon.presentation
 
 import android.app.Activity
+import android.content.ComponentName
+import android.content.Context
 import android.content.Intent
+import android.content.ServiceConnection
+import android.media.AudioAttributes
+import android.media.RingtoneManager
 import android.os.Bundle
 import android.os.CountDownTimer
+import android.os.IBinder
 import android.util.Log
 import android.view.Gravity
 import android.widget.ImageButton
@@ -55,6 +61,8 @@ class DetectedActivity : ComponentActivity() {
         }
     }
 
+    private var fallDetectionService: FallDetectionService? = null
+
     /*
      * Set layout, buttons, views
      * get classification result from MainActivity
@@ -64,6 +72,9 @@ class DetectedActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_detected)
         Log.d("Detected onCreate", "created")
+
+        val serviceIntent = Intent(this, FallDetectionService::class.java)
+        bindService(serviceIntent, serviceConnection, Context.BIND_AUTO_CREATE)
 
         val confirmButton: ImageButton = findViewById(R.id.activity_detected_Confirm)
         val disconfirmButton: ImageButton = findViewById(R.id.activity_detected_Disconfirm)
@@ -82,7 +93,6 @@ class DetectedActivity : ComponentActivity() {
             classificationResult?.get(4) -> FallType.SUNKEN_FLOOR
             else -> FallType.NON_FALL
         }
-        Log.d("Detected onCreate", "fall Type ${fallType.strFall}")
 
         fallText.text = "낙상 감지!!!"
         fallText.gravity = Gravity.CENTER
@@ -90,6 +100,21 @@ class DetectedActivity : ComponentActivity() {
         fallTypeText.gravity = Gravity.CENTER
 
         fall = FallHistory(TestUserID, fallType, Date())
+
+        /*
+         * alarm even if the volume is 0 in watch setting.
+         */
+        val alarmSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
+        val audioAttributes = AudioAttributes.Builder()
+            .setUsage(AudioAttributes.USAGE_ALARM)
+            .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+            .build()
+
+        val ringtone = RingtoneManager.getRingtone(applicationContext, alarmSound)
+        ringtone.audioAttributes = audioAttributes
+        ringtone.play()
+
+
         countDown()
 
 
@@ -107,6 +132,17 @@ class DetectedActivity : ComponentActivity() {
             resultIntent.putExtra("confirmed", false)
             setResult(Activity.RESULT_OK, resultIntent)
             finish()
+        }
+    }
+
+    private val serviceConnection = object : ServiceConnection {
+        override fun onServiceConnected(className: ComponentName?, service: IBinder?) {
+            val binder = service as FallDetectionService.LocalBinder
+            fallDetectionService = binder.getService()
+        }
+
+        override fun onServiceDisconnected(className: ComponentName?) {
+            fallDetectionService = null
         }
     }
 
@@ -173,7 +209,10 @@ class DetectedActivity : ComponentActivity() {
     }
 
     override fun onDestroy() {
+        Log.d("DetectedActivity", "Destroyed")
         super.onDestroy()
+        fallDetectionService?.notifyActivityFinished()
         countDownTimer.cancel()
+        unbindService(serviceConnection)
     }
 }
