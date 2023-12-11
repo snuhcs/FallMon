@@ -64,9 +64,11 @@ class FallDetectionService : Service() {
             val channel = NotificationChannel("FallDetectionChannelId", name, importance).apply {
                 description = descriptionText
             }
-            val notificationManager: NotificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            val notificationManager = getSystemService(NotificationManager::class.java)
             notificationManager.createNotificationChannel(channel)
         }
+
+        notification()
     }
 
     /*
@@ -83,6 +85,37 @@ class FallDetectionService : Service() {
             1000000 / SAMPLING_RATE,
             1000000 / SAMPLING_RATE
         )
+    }
+
+    private fun notification() {
+        /*
+         * run this code for maintain application to be run continuously
+         */
+        Log.d("FallDetectionService", "notification")
+        // Create a notification channel for Android Oreo and above
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val notificationChannel = NotificationChannel(
+                "ForegroundServiceChannel",
+                "Foreground Service Channel",
+                NotificationManager.IMPORTANCE_DEFAULT
+            )
+            val notificationManager = getSystemService(NotificationManager::class.java)
+            notificationManager.createNotificationChannel(notificationChannel)
+        }
+
+        // Create and show a notification for the foreground service
+        val notificationIntent = Intent(this, MainActivity::class.java)
+        val pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, PendingIntent.FLAG_IMMUTABLE)
+
+        val notification = NotificationCompat.Builder(this, "ForegroundServiceChannel")
+            .setContentTitle("Foreground Service")
+            .setContentText("Running...")
+            .setSmallIcon(R.drawable.ic_alarm)
+            .setContentIntent(pendingIntent)
+            .build()
+
+        // Start foreground service with notification
+        startForeground(1234, notification)
     }
 
     /*

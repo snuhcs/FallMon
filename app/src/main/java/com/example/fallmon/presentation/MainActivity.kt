@@ -11,6 +11,7 @@ import android.os.Bundle
 import android.widget.TextView
 import androidx.activity.ComponentActivity
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
 import com.example.fallmon.R
 
 interface ActivityResultListener {
@@ -49,7 +50,7 @@ class MainActivity : ComponentActivity(), ActivityResultListener {
         val fallDetectionService = FallDetectionService()
         fallDetectionService.setActivityResultListener(this)
         val serviceIntent = Intent(this, FallDetectionService::class.java)
-        startService(serviceIntent)
+        ContextCompat.startForegroundService(this, serviceIntent)
     }
 
     override fun onActivityFinished() {
