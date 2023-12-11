@@ -15,6 +15,7 @@ import com.example.fallmon.R
 
 interface ActivityResultListener {
     fun onActivityFinished()
+    fun onActivityCreated()
 }
 
 class MainActivity : ComponentActivity(), ActivityResultListener {
@@ -52,5 +53,8 @@ class MainActivity : ComponentActivity(), ActivityResultListener {
     }
 
     override fun onActivityFinished() {
+    }
+
+    override fun onActivityCreated() {
     }
 }

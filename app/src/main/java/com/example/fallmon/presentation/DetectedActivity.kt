@@ -114,10 +114,7 @@ class DetectedActivity : ComponentActivity() {
         ringtone.audioAttributes = audioAttributes
         ringtone.play()
 
-
         countDown()
-
-
 
         /*
          * confirm button : confirm the fall and send data to server
@@ -139,6 +136,7 @@ class DetectedActivity : ComponentActivity() {
         override fun onServiceConnected(className: ComponentName?, service: IBinder?) {
             val binder = service as FallDetectionService.LocalBinder
             fallDetectionService = binder.getService()
+            fallDetectionService?.notifyActivityCreated()
         }
 
         override fun onServiceDisconnected(className: ComponentName?) {

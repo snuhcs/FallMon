@@ -41,11 +41,13 @@ class FallDetectionService : Service() {
      * var, listener, binder for intent DetectedActivity & receiving isFinished
      */
     private var intented: Boolean = false
+    private val pendingDetectionTime: Int = 300  //  seconds = value / 30 Hz
+    private var afterDetectionTime: Int = pendingDetectionTime
     private var activityResultListener: ActivityResultListener? = null
     fun setActivityResultListener(listener: ActivityResultListener) {
         this.activityResultListener = listener
     }
-    private val binder = LocalBinder()
+    private val binder: LocalBinder = LocalBinder()
 
     /*
      * Constructor
@@ -105,8 +107,9 @@ class FallDetectionService : Service() {
                 sensor_window_transpose[2][window_index % WINDOW_SIZE] = zAcceleration
 
                 window_index += 1
+                afterDetectionTime += 1
 
-                if (window_index % WINDOW_STRIDE == 0 && window_index >= WINDOW_SIZE) {
+                if (window_index % WINDOW_STRIDE == 0 && window_index >= WINDOW_SIZE && !intented) {
                     sensorWindowFulled()
                 }
             }
@@ -136,7 +139,7 @@ class FallDetectionService : Service() {
         val score = Model.score(features.map {t -> t.toDouble()}.toDoubleArray())
         val classificationResult = ClassificationModel.score(features.map{t -> t.toDouble()}.toDoubleArray())
 
-        if(score[1] == score.max() && !intented) {
+        if(score[1] == score.max() && !intented && pendingDetectionTime < afterDetectionTime) {
             fallDetected(classificationResult)
         }
 
@@ -157,9 +160,8 @@ class FallDetectionService : Service() {
      */
     private fun fallDetected(classificationResult: DoubleArray) {
 
+        afterDetectionTime = 0
         Log.d("Service fallDetected","Fall detected")
-
-        intented = true
 
         /*
          * Create a notification to open DetectedActivity
@@ -206,7 +208,7 @@ class FallDetectionService : Service() {
     }
 
     /*
-     * when DetectedActivity destroys, this function will be called
+     * when DetectedActivity creates/destroys, this function will be called for checking intent
      */
     fun notifyActivityFinished() {
         Log.d("FallDetectionService", "DetectedActivity Finished")
@@ -214,7 +216,14 @@ class FallDetectionService : Service() {
         intented = false
     }
 
+    fun notifyActivityCreated() {
+        Log.d("FallDetectionService", "DetectedActivity Created")
+        activityResultListener?.onActivityCreated()
+        intented = true
+    }
+
     override fun onDestroy() {
+        Log.d("FallDetectionService", "Warning: FallDetectionService Destroyed")
         super.onDestroy()
         sensorManager.unregisterListener(sensorListener)
     }
