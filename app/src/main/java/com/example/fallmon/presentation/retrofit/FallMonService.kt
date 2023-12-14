@@ -9,7 +9,7 @@ public interface FallMonService{
     @POST("/api/fall_history")
     fun createFallHistory(
         @Query("user_id") id: String,
-        @Query("created_at") createdAt: String,
+        @Query("created_at", encoded = true) createdAt: String,
         @Query("fall_type") fallType: String
     ) : Call<FallHistoryDTO>
 
