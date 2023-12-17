@@ -93,6 +93,7 @@ class DetectedActivity : ComponentActivity() {
             classificationResult?.get(4) -> FallType.SUNKEN_FLOOR
             else -> FallType.NON_FALL
         }
+        Log.d("Detected onCreate", "fall Type ${fallType.strFall}")
 
         fallText.text = "낙상 감지!!!"
         fallText.gravity = Gravity.CENTER
@@ -121,7 +122,7 @@ class DetectedActivity : ComponentActivity() {
          * disconfirm button : disconfirm the fall, not send data to server
          */
         confirmButton.setOnClickListener {
-            confirmed(fall)
+            sendRequest(fall)
         }
 
         disconfirmButton.setOnClickListener {
@@ -158,7 +159,7 @@ class DetectedActivity : ComponentActivity() {
             }
 
             override fun onFinish() {
-                confirmed(fall)
+                sendRequest(fall)
             }
         }
 
@@ -175,34 +176,44 @@ class DetectedActivity : ComponentActivity() {
             val server = retrofit.create(FallMonService::class.java)
             server.createFallHistory(fallHistory.id, createdStr, fallHistory.fallType.strFall).enqueue(object : Callback<FallHistoryDTO>{
                 override fun onFailure(call: Call<FallHistoryDTO>, t: Throwable) {
-                    Log.e("Retrofit", t.toString())
+                    Log.e("Retrofit", "Error: ${t.message}")
+                    requestFailed()
                 }
 
                 override fun onResponse(
                     call: Call<FallHistoryDTO>,
                     response: Response<FallHistoryDTO>
                 ) {
-                    Log.d("Retrofit", "success")
-                    val id = response.body()?.id
-                    val createdAt = response.body()?.createdAt
-                    val fallType = response.body()?.fallType
+                    if(response.isSuccessful){
+                        Log.d("Retrofit", "Success: response code ${response.code()}")
+                        requestSucceeded()
+                    }else{
+                        Log.d("Retrofit", "Failed: response code ${response.code()}")
+                        requestFailed()
+                    }
                 }
             })
         }catch(e:Exception){
-            Log.e("Retrofit", e.toString())
+            Log.e("Retrofit", "Error: ${e.message}")
+            requestFailed()
         }
 
     }
-
-    /*
-     * run when that fall is confirmed
-     * request data sending, then intent ConfirmedActivity
-     */
-    private fun confirmed(fall: FallHistory) {
+    private fun sendRequest(fall: FallHistory) {
         Log.d("Detected confirmed", "confirmed")
         request(fall)
         Log.d("Detected confirmed", "request")
+    }
+
+    private fun requestSucceeded(){
         val intent = Intent(this, ConfirmedActivity::class.java)
+        intent.putExtra("isSuccessful", true)
+        getActivityResult.launch(intent)
+    }
+
+    private fun requestFailed(){
+        val intent = Intent(this, ConfirmedActivity::class.java)
+        intent.putExtra("isSuccessful", false)
         getActivityResult.launch(intent)
     }
 
