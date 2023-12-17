@@ -11,15 +11,24 @@ import android.widget.TextView
 import androidx.activity.ComponentActivity
 import com.example.fallmon.R
 
+/*
+ *
+ *  This whole activity is for just showing that the fall data is successfully sent to data
+ *
+ */
+
+
 class ConfirmedActivity: ComponentActivity() {
+
     private lateinit var countDownTimer: CountDownTimer
     private val totalTimeInMillis: Long = 5000  // 5 seconds
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_confirmed) // Set your layout here
+
+        val confirmButton: ImageButton = findViewById(R.id.activity_confirmed_Confirm)
         setContentView(R.layout.activity_detected) // Set your layout here
-        Log.d("Confirmed", "created")
-        val confirmButton: ImageButton = findViewById(R.id.activity_detected_Confirm)
 
         countDown()
 
