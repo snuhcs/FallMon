@@ -29,13 +29,13 @@ import java.util.Date
 
 class DetectedActivity : ComponentActivity() {
 
-    /*
+    /**
      * for countdown automatic data sending
      */
     private lateinit var countDownTimer: CountDownTimer
     private val totalTimeInMillis: Long = 20000  // 20 seconds
 
-    /*
+    /**
      * for data sending
      */
     private val BaseURL: String = "http://34.22.106.16:8080"
@@ -49,7 +49,7 @@ class DetectedActivity : ComponentActivity() {
     }
     private lateinit var fall: FallHistory
 
-    /*
+    /**
      * put data sending was confirmed (and sended) to MainActivity & intent finish
      */
     private val getActivityResult = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
@@ -63,7 +63,7 @@ class DetectedActivity : ComponentActivity() {
 
     private var fallDetectionService: FallDetectionService? = null
 
-    /*
+    /**
      * Set layout, buttons, views
      * get classification result from MainActivity
      * Decide falltype by result and show them.
@@ -105,7 +105,7 @@ class DetectedActivity : ComponentActivity() {
 
         countDown()
 
-        /*
+        /**
          * confirm button : confirm the fall and send data to server
          * disconfirm button : disconfirm the fall, not send data to server
          */
@@ -133,7 +133,7 @@ class DetectedActivity : ComponentActivity() {
         }
     }
 
-    /*
+    /**
      * alarm even if the volume is 0 in watch setting.
      */
     private fun alarm() {
@@ -148,7 +148,7 @@ class DetectedActivity : ComponentActivity() {
         ringtone.play()
     }
 
-    /*
+    /**
      * countdown automatic data sending
      * remaining second is continuously put in UI
      */
@@ -169,7 +169,7 @@ class DetectedActivity : ComponentActivity() {
         countDownTimer.start()
     }
 
-    /*
+    /**
      * request server to put fall data
      */
     private fun request(fallHistory: FallHistory){

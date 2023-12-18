@@ -6,6 +6,7 @@ import android.app.PendingIntent
 import android.app.Service
 import android.content.Context
 import android.content.Intent
+import android.content.pm.ServiceInfo
 import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
@@ -19,14 +20,14 @@ import com.example.fallmon.R
 
 class FallDetectionService : Service() {
 
-    /*
+    /**
      * sensors / views
      * text_square for debugging
      */
     private lateinit var sensorManager: SensorManager
     private var mAccelerometer: Sensor?= null
 
-    /*
+    /**
      * 30Hz Samples, total 75 * 3 (x,y,z) data for a window, 15 striding
      */
     private val SAMPLING_RATE: Int = 30
@@ -37,7 +38,7 @@ class FallDetectionService : Service() {
     private var sensor_window_transpose = Array(3) { Array(WINDOW_SIZE) { 0.0f } }
     private var window_index: Int = 0
 
-    /*
+    /**
      * var, listener, binder for intent DetectedActivity & receiving isFinished
      */
     private var intented: Boolean = false
@@ -49,11 +50,12 @@ class FallDetectionService : Service() {
     }
     private val binder: LocalBinder = LocalBinder()
 
-    /*
+    /**
      * Constructor
      * set up textview, sensor
      */
     override fun onCreate() {
+        Log.d("FallDetectionService", "Service Created")
         super.onCreate()
         setUpSensor()
 
@@ -71,7 +73,8 @@ class FallDetectionService : Service() {
         notification()
     }
 
-    /*
+
+    /**
      * Set up sensor when the app starts
      * sampling period = 1000000 (us) / SAMPLING_RATE
      */
@@ -118,7 +121,7 @@ class FallDetectionService : Service() {
         startForeground(1234, notification)
     }
 
-    /*
+    /**
      * Run at every sensor samples data
      * Save sensor values in window, run sensorWindowFulled() when 75 * 3 data is ready.
      */
@@ -153,11 +156,12 @@ class FallDetectionService : Service() {
         }
     }
 
-    /*
+    /**
      * transpose data to 3 * 75 for getting features
      * get scores by running model, intent DetectedActivity if fall detected
      */
     private fun sensorWindowFulled() {
+        notification()
         sensor_window_transpose = Array(3, {Array<Float>(WINDOW_SIZE, {0.0f})})
 
         for(i: Int in 0 until 3)
@@ -176,6 +180,7 @@ class FallDetectionService : Service() {
             fallDetected(classificationResult)
         }
 
+        /* For Debugging Date processing values
         val featureText = """${window_index}
             |score: ${score[0]} ${score[1]}
             |classification: ${classificationResult[0]} ${classificationResult[1]} ${classificationResult[2]} ${classificationResult[3]} ${classificationResult[4]}
@@ -184,10 +189,12 @@ class FallDetectionService : Service() {
             |z: ${features.filterIndexed{i, _ -> i % 3 == 2}.joinToString(limit=5, transform = {x-> "%.2f".format(x)})}
             |""".trimMargin()
 
+         */
+
 
     }
 
-    /*
+    /**
      * Service calls this function when fall is detected even if background.
      * Popping up DetectedActivity, and alarm.
      */
@@ -196,7 +203,7 @@ class FallDetectionService : Service() {
         afterDetectionTime = 0
         Log.d("Service fallDetected","Fall detected")
 
-        /*
+        /**
          * Create a notification to open DetectedActivity
          */
         val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -227,7 +234,7 @@ class FallDetectionService : Service() {
         startActivity(intent)
     }
 
-    /*
+    /**
      * Binder for Activities to bind this service
      */
     inner class LocalBinder : Binder() {
@@ -240,7 +247,7 @@ class FallDetectionService : Service() {
         return binder
     }
 
-    /*
+    /**
      * when DetectedActivity creates/destroys, this function will be called for checking intent
      */
     fun notifyActivityFinished() {
@@ -253,6 +260,16 @@ class FallDetectionService : Service() {
         Log.d("FallDetectionService", "DetectedActivity Created")
         activityResultListener?.onActivityCreated()
         intented = true
+    }
+
+    fun stopService() {
+        val d = Log.d("FallDetectionService", "Stopping Service...")
+        try {
+            stopForeground(STOP_FOREGROUND_REMOVE)
+        } catch (e:Exception) {
+
+        }
+        stopSelf()
     }
 
     override fun onDestroy() {

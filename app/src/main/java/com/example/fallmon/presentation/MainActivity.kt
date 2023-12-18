@@ -24,12 +24,13 @@ interface ActivityResultListener {
 
 class MainActivity : ComponentActivity(), ActivityResultListener {
 
-    /*
+    /**
      * Check if service is running
      */
+    private lateinit var fallDetectionService : FallDetectionService
     private var isRunning : Boolean = false
 
-    /*
+    /**
      * intented : check if intented DetectedActivity
      * getActivityResult : to get result from DetectedActivity
      */
@@ -41,7 +42,7 @@ class MainActivity : ComponentActivity(), ActivityResultListener {
         }
     }
 
-    /*
+    /**
      * Constructor
      * Start FallDetectionService
      */
@@ -54,6 +55,8 @@ class MainActivity : ComponentActivity(), ActivityResultListener {
         val buttonHistory : ImageButton = findViewById(R.id.activity_main_history)
         val buttonSetting : ImageButton = findViewById(R.id.activity_main_setting)
 
+        fallDetectionService = FallDetectionService()
+
         textDetecting.gravity = Gravity.CENTER
         if(!isRunning) {
             textDetecting.text = "낙상 감지 꺼짐"
@@ -65,7 +68,7 @@ class MainActivity : ComponentActivity(), ActivityResultListener {
         buttonPower.setOnClickListener {
             isRunning = !isRunning
             if(isRunning) {
-                //runFallDetectionService()
+                runFallDetectionService()
                 buttonPower.setColorFilter(Color.parseColor("#FF0000"))
                 textDetecting.text = "낙상 감지 켜짐"
             } else {
@@ -86,11 +89,12 @@ class MainActivity : ComponentActivity(), ActivityResultListener {
     }
 
     private fun stopFallDetectionService() {
-
+        fallDetectionService.stopService()
+        val serviceIntent = Intent(this, FallDetectionService::class.java)
+        stopService(serviceIntent)
     }
 
     private fun runFallDetectionService() {
-        val fallDetectionService = FallDetectionService()
         fallDetectionService.setActivityResultListener(this)
         val serviceIntent = Intent(this, FallDetectionService::class.java)
         ContextCompat.startForegroundService(this, serviceIntent)
