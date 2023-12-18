@@ -83,15 +83,13 @@ class DetectedActivity : ComponentActivity() {
 
         val classificationResult = intent.getDoubleArrayExtra("classificationResult")
 
-        var fallType = FallType.FALL    // default : simple fall
-
-        fallType = when(classificationResult?.max()) {
+        val fallType = when(classificationResult?.max()) {
             classificationResult?.get(0) -> FallType.DROP_ATTACK
             //classificationResult?.get(1) -> FallType.NON_FALL
             classificationResult?.get(2) -> FallType.SLIPPING
             classificationResult?.get(3) -> FallType.STAND_PUSH
             classificationResult?.get(4) -> FallType.SUNKEN_FLOOR
-            else -> FallType.NON_FALL
+            else -> FallType.FALL
         }
         Log.d("Detected onCreate", "fall Type ${fallType.strFall}")
 
@@ -102,18 +100,8 @@ class DetectedActivity : ComponentActivity() {
 
         fall = FallHistory(TestUserID, fallType, Date())
 
-        /*
-         * alarm even if the volume is 0 in watch setting.
-         */
-        val alarmSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
-        val audioAttributes = AudioAttributes.Builder()
-            .setUsage(AudioAttributes.USAGE_ALARM)
-            .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
-            .build()
 
-        val ringtone = RingtoneManager.getRingtone(applicationContext, alarmSound)
-        ringtone.audioAttributes = audioAttributes
-        ringtone.play()
+        alarm()
 
         countDown()
 
@@ -143,6 +131,21 @@ class DetectedActivity : ComponentActivity() {
         override fun onServiceDisconnected(className: ComponentName?) {
             fallDetectionService = null
         }
+    }
+
+    /*
+     * alarm even if the volume is 0 in watch setting.
+     */
+    private fun alarm() {
+        val alarmSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
+        val audioAttributes = AudioAttributes.Builder()
+            .setUsage(AudioAttributes.USAGE_ALARM)
+            .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+            .build()
+
+        val ringtone = RingtoneManager.getRingtone(applicationContext, alarmSound)
+        ringtone.audioAttributes = audioAttributes
+        ringtone.play()
     }
 
     /*
