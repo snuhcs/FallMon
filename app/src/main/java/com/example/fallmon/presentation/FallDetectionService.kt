@@ -161,7 +161,9 @@ class FallDetectionService : Service() {
      * get scores by running model, intent DetectedActivity if fall detected
      */
     private fun sensorWindowFulled() {
-        notification()
+        if(window_index % 75 == 0) {
+            notification()
+        }
         sensor_window_transpose = Array(3, {Array<Float>(WINDOW_SIZE, {0.0f})})
 
         for(i: Int in 0 until 3)
@@ -211,7 +213,7 @@ class FallDetectionService : Service() {
 
         val intent = Intent(this, DetectedActivity::class.java)
         intent.putExtra("classificationResult", classificationResult)
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
 
         val pendingIntent = if (Build.VERSION.SDK_INT>= Build.VERSION_CODES.S){
             PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_IMMUTABLE); //Activity를 시작하는 인텐트 생성
@@ -263,7 +265,7 @@ class FallDetectionService : Service() {
     }
 
     fun stopService() {
-        val d = Log.d("FallDetectionService", "Stopping Service...")
+        Log.d("FallDetectionService", "Stopping Service...")
         try {
             stopForeground(STOP_FOREGROUND_REMOVE)
         } catch (e:Exception) {

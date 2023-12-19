@@ -59,6 +59,14 @@
 
         </activity>
 
+        <activity
+            android:name=".presentation.HistoryActivity"
+            android:label="HistoryActivity"
+            android:exported="true"
+            android:theme="@android:style/Theme.DeviceDefault">
+
+        </activity>
+
     </application>
 
 </manifest>

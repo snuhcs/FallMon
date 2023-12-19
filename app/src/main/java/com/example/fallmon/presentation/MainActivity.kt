@@ -6,15 +6,24 @@
 
 package com.example.fallmon.presentation
 
+import android.app.ActivityManager
+import android.content.ComponentName
+import android.content.Context
 import android.content.Intent
+import android.content.ServiceConnection
 import android.graphics.Color
 import android.os.Bundle
+import android.os.IBinder
+import android.os.PersistableBundle
+import android.util.Log
 import android.view.Gravity
 import android.widget.ImageButton
 import android.widget.TextView
 import androidx.activity.ComponentActivity
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewModelScope
 import com.example.fallmon.R
 
 interface ActivityResultListener {
@@ -24,16 +33,12 @@ interface ActivityResultListener {
 
 class MainActivity : ComponentActivity(), ActivityResultListener {
 
-    /**
-     * Check if service is running
-     */
-    private lateinit var fallDetectionService : FallDetectionService
-    private var isRunning : Boolean = false
 
     /**
      * intented : check if intented DetectedActivity
      * getActivityResult : to get result from DetectedActivity
      */
+    /*
     private var intented: Boolean = false
     private val getActivityResult = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
         if(it.resultCode == RESULT_OK) {
@@ -42,12 +47,40 @@ class MainActivity : ComponentActivity(), ActivityResultListener {
         }
     }
 
+     */
+
+    /**
+     * Check if service is running
+     */
+
+    private var fallDetectionService : FallDetectionService? = null
+    /*
+    private var isBound = false
+
+    private val connection = object : ServiceConnection {
+        override fun onServiceConnected(className: ComponentName, service: IBinder) {
+            val binder = service as FallDetectionService.LocalBinder
+            fallDetectionService = binder.getService()
+            isBound = true
+        }
+
+        override fun onServiceDisconnected(arg0: ComponentName) {
+            //fallDetectionService = null
+            isBound = false
+        }
+    }
+
+     */
+
+    private var isRunning: Boolean = false
+
     /**
      * Constructor
      * Start FallDetectionService
      */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        Log.d("MainActivity", "Created")
         setContentView(R.layout.activity_main)
 
         val textDetecting : TextView = findViewById(R.id.activity_main_detecting)
@@ -64,7 +97,6 @@ class MainActivity : ComponentActivity(), ActivityResultListener {
             textDetecting.text = "낙상 감지 켜짐"
         }
 
-
         buttonPower.setOnClickListener {
             isRunning = !isRunning
             if(isRunning) {
@@ -79,7 +111,7 @@ class MainActivity : ComponentActivity(), ActivityResultListener {
         }
 
         buttonHistory.setOnClickListener {
-
+            runHistoryActivity()
         }
 
         buttonSetting.setOnClickListener {
@@ -88,14 +120,20 @@ class MainActivity : ComponentActivity(), ActivityResultListener {
 
     }
 
+    private fun runHistoryActivity() {
+        val intent = Intent(this, HistoryActivity::class.java)
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        startActivity(intent)
+    }
+
     private fun stopFallDetectionService() {
-        fallDetectionService.stopService()
+        fallDetectionService?.stopService()
         val serviceIntent = Intent(this, FallDetectionService::class.java)
         stopService(serviceIntent)
     }
 
     private fun runFallDetectionService() {
-        fallDetectionService.setActivityResultListener(this)
+        fallDetectionService?.setActivityResultListener(this)
         val serviceIntent = Intent(this, FallDetectionService::class.java)
         ContextCompat.startForegroundService(this, serviceIntent)
     }
@@ -104,5 +142,10 @@ class MainActivity : ComponentActivity(), ActivityResultListener {
     }
 
     override fun onActivityCreated() {
+    }
+
+    override fun onDestroy() {
+        Log.d("MainActivity", "Destroyed")
+        super.onDestroy()
     }
 }
