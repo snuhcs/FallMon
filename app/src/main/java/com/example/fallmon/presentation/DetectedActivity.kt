@@ -36,17 +36,11 @@ class DetectedActivity : ComponentActivity() {
     private val totalTimeInMillis: Long = 20000  // 20 seconds
 
     /*
-     * for data sending
+     * retrofit client
      */
-    private val BaseURL: String = "http://34.22.106.16:8080"
-    private val TestUserID: String = "234532"
-    private val FallHistoryURL: String = "$BaseURL/api/fall_history"
-    private val retrofit: Retrofit by lazy {
-       Retrofit.Builder()
-            .baseUrl(BaseURL)
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
-    }
+    private lateinit var retrofit: Retrofit
+    private lateinit var userID: String
+
     private lateinit var fall: FallHistory
 
     /*
@@ -71,7 +65,8 @@ class DetectedActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_detected)
-        Log.d("Detected onCreate", "created")
+        retrofit = RetrofitClient.instance
+        userID = getSharedPreferences("User", MODE_PRIVATE)?.getString("ID", "").toString()
 
         val serviceIntent = Intent(this, FallDetectionService::class.java)
         bindService(serviceIntent, serviceConnection, Context.BIND_AUTO_CREATE)
@@ -100,7 +95,7 @@ class DetectedActivity : ComponentActivity() {
         fallTypeText.text = fallType.strFall
         fallTypeText.gravity = Gravity.CENTER
 
-        fall = FallHistory(TestUserID, fallType, Date())
+        fall = FallHistory(userID, fallType, Date())
 
         /*
          * alarm even if the volume is 0 in watch setting.

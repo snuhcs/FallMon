@@ -1,13 +1,6 @@
-/* While this template provides a good starting point for using Wear Compose, you can always
- * take a look at https://github.com/android/wear-os-samples/tree/main/ComposeStarter and
- * https://github.com/android/wear-os-samples/tree/main/ComposeAdvanced to find the most up to date
- * changes to the libraries and their usages.
- */
-
 package com.example.fallmon.presentation
 
 import android.content.Intent
-import android.content.SharedPreferences
 import android.os.Bundle
 import android.util.Log
 import android.widget.TextView
@@ -16,14 +9,10 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import com.example.fallmon.R
 import com.example.fallmon.presentation.retrofit.FallMonService
-import com.example.fallmon.presentation.retrofit.dto.FallHistoryDTO
 import com.example.fallmon.presentation.retrofit.dto.UserDTO
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
-import java.text.SimpleDateFormat
 import java.util.UUID
 
 interface ActivityResultListener {
@@ -65,7 +54,6 @@ class MainActivity : ComponentActivity(), ActivityResultListener {
 
     /*
      *  initialize local user ID and PW
-     *  TODO: save PW with secure way
      */
     private fun setupLocalUser(){
         val userID: String = getOrSetSharedPreferences("User", "ID", UUID.randomUUID().toString())
