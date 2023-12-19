@@ -54,6 +54,7 @@
 
         <activity
             android:name=".presentation.ConfirmedActivity"
+            android:label="ConfirmedActivity"
             android:exported="true"
             android:theme="@android:style/Theme.DeviceDefault">
 
@@ -62,6 +63,14 @@
         <activity
             android:name=".presentation.HistoryActivity"
             android:label="HistoryActivity"
+            android:exported="true"
+            android:theme="@android:style/Theme.DeviceDefault">
+
+        </activity>
+
+        <activity
+            android:name=".presentation.SettingActivity"
+            android:label="SettingActivity"
             android:exported="true"
             android:theme="@android:style/Theme.DeviceDefault">
 

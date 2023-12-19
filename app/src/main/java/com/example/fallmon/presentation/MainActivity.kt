@@ -33,7 +33,6 @@ interface ActivityResultListener {
 
 class MainActivity : ComponentActivity(), ActivityResultListener {
 
-
     /**
      * intented : check if intented DetectedActivity
      * getActivityResult : to get result from DetectedActivity
@@ -115,13 +114,19 @@ class MainActivity : ComponentActivity(), ActivityResultListener {
         }
 
         buttonSetting.setOnClickListener {
-
+            runSettingActivity()
         }
 
     }
 
     private fun runHistoryActivity() {
         val intent = Intent(this, HistoryActivity::class.java)
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        startActivity(intent)
+    }
+
+    private fun runSettingActivity() {
+        val intent = Intent(this, SettingActivity::class.java)
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         startActivity(intent)
     }
