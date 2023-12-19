@@ -1,7 +1,9 @@
 package com.example.fallmon.presentation.retrofit
 
 import com.example.fallmon.presentation.retrofit.dto.FallHistoryDTO
+import com.example.fallmon.presentation.retrofit.dto.UserDTO
 import retrofit2.Call
+import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.Query
 
@@ -13,4 +15,9 @@ public interface FallMonService{
         @Query("fall_type") fallType: String
     ) : Call<FallHistoryDTO>
 
+    @POST("/api/user")
+    fun createUser(
+        @Query("user_id") id: String,
+        @Query("pw") pw: String
+    ) : Call<UserDTO>
 }
