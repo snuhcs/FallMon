@@ -29,21 +29,21 @@ import java.util.Date
 
 class DetectedActivity : ComponentActivity() {
 
-    /*
+    /**
      * for countdown automatic data sending
      */
     private lateinit var countDownTimer: CountDownTimer
     private val totalTimeInMillis: Long = 20000  // 20 seconds
 
-    /*
-     * retrofit client
+    /**
+     * for data sending
      */
     private lateinit var retrofit: Retrofit
     private lateinit var userID: String
 
     private lateinit var fall: FallHistory
 
-    /*
+    /**
      * put data sending was confirmed (and sended) to MainActivity & intent finish
      */
     private val getActivityResult = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
@@ -55,9 +55,9 @@ class DetectedActivity : ComponentActivity() {
         }
     }
 
-    private var fallDetectionService: FallDetectionService? = null
+    //private var fallDetectionService: FallDetectionService? = null
 
-    /*
+    /**
      * Set layout, buttons, views
      * get classification result from MainActivity
      * Decide falltype by result and show them.
@@ -68,8 +68,8 @@ class DetectedActivity : ComponentActivity() {
         retrofit = RetrofitClient.instance
         userID = getSharedPreferences("User", MODE_PRIVATE)?.getString("ID", "").toString()
 
-        val serviceIntent = Intent(this, FallDetectionService::class.java)
-        bindService(serviceIntent, serviceConnection, Context.BIND_AUTO_CREATE)
+        //val serviceIntent = Intent(this, FallDetectionService::class.java)
+        //bindService(serviceIntent, serviceConnection, Context.BIND_AUTO_CREATE)
 
         val confirmButton: ImageButton = findViewById(R.id.activity_detected_Confirm)
         val disconfirmButton: ImageButton = findViewById(R.id.activity_detected_Disconfirm)
@@ -78,15 +78,13 @@ class DetectedActivity : ComponentActivity() {
 
         val classificationResult = intent.getDoubleArrayExtra("classificationResult")
 
-        var fallType = FallType.FALL    // default : simple fall
-
-        fallType = when(classificationResult?.max()) {
+        val fallType = when(classificationResult?.max()) {
             classificationResult?.get(0) -> FallType.DROP_ATTACK
             //classificationResult?.get(1) -> FallType.NON_FALL
             classificationResult?.get(2) -> FallType.SLIPPING
             classificationResult?.get(3) -> FallType.STAND_PUSH
             classificationResult?.get(4) -> FallType.SUNKEN_FLOOR
-            else -> FallType.NON_FALL
+            else -> FallType.FALL
         }
         Log.d("Detected onCreate", "fall Type ${fallType.strFall}")
 
@@ -97,22 +95,12 @@ class DetectedActivity : ComponentActivity() {
 
         fall = FallHistory(userID, fallType, Date())
 
-        /*
-         * alarm even if the volume is 0 in watch setting.
-         */
-        val alarmSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
-        val audioAttributes = AudioAttributes.Builder()
-            .setUsage(AudioAttributes.USAGE_ALARM)
-            .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
-            .build()
 
-        val ringtone = RingtoneManager.getRingtone(applicationContext, alarmSound)
-        ringtone.audioAttributes = audioAttributes
-        ringtone.play()
+        alarm()
 
         countDown()
 
-        /*
+        /**
          * confirm button : confirm the fall and send data to server
          * disconfirm button : disconfirm the fall, not send data to server
          */
@@ -127,7 +115,7 @@ class DetectedActivity : ComponentActivity() {
             finish()
         }
     }
-
+/*
     private val serviceConnection = object : ServiceConnection {
         override fun onServiceConnected(className: ComponentName?, service: IBinder?) {
             val binder = service as FallDetectionService.LocalBinder
@@ -140,7 +128,24 @@ class DetectedActivity : ComponentActivity() {
         }
     }
 
-    /*
+ */
+
+    /**
+     * alarm even if the volume is 0 in watch setting.
+     */
+    private fun alarm() {
+        val alarmSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
+        val audioAttributes = AudioAttributes.Builder()
+            .setUsage(AudioAttributes.USAGE_ALARM)
+            .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+            .build()
+
+        val ringtone = RingtoneManager.getRingtone(applicationContext, alarmSound)
+        ringtone.audioAttributes = audioAttributes
+        ringtone.play()
+    }
+
+    /**
      * countdown automatic data sending
      * remaining second is continuously put in UI
      */
@@ -161,7 +166,7 @@ class DetectedActivity : ComponentActivity() {
         countDownTimer.start()
     }
 
-    /*
+    /**
      * request server to put fall data
      */
     private fun request(fallHistory: FallHistory){
@@ -215,8 +220,8 @@ class DetectedActivity : ComponentActivity() {
     override fun onDestroy() {
         Log.d("DetectedActivity", "Destroyed")
         super.onDestroy()
-        fallDetectionService?.notifyActivityFinished()
+        //fallDetectionService?.notifyActivityFinished()
         countDownTimer.cancel()
-        unbindService(serviceConnection)
+        //unbindService(serviceConnection)
     }
 }
