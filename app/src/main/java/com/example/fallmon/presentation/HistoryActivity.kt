@@ -25,20 +25,13 @@ class HistoryActivity: ComponentActivity() {
     /**
      * for data sending
      */
-    private val BaseURL: String = "http://34.22.106.16:8080"
-    private val TestUserID: String = "234532"
-    private val FallHistoryURL: String = "$BaseURL/api/fall_history"
-    private val retrofit: Retrofit by lazy {
-        Retrofit.Builder()
-            .baseUrl(BaseURL)
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
-    }
-    private lateinit var fall: FallHistory
+    private lateinit var retrofit: Retrofit
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_history)
+        retrofit = RetrofitClient.instance
+        val userID = getSharedPreferences("User", MODE_PRIVATE)?.getString("ID", "").toString()
         textHistoryRecord = findViewById(R.id.activity_history_record)
         val buttonBack : ImageButton = findViewById(R.id.activity_history_back)
 
@@ -48,17 +41,17 @@ class HistoryActivity: ComponentActivity() {
             finish()
         }
 
-        request(TestUserID)
+        request(userID)
     }
 
     /**
      * request server to put fall data
      */
-    private fun request(user_id: String){
+    private fun request(userID: String){
         try{
-            Log.d("history request", "user_id : $TestUserID")
+            Log.d("history request", "userID : $userID")
             val server = retrofit.create(FallMonService::class.java)
-            server.getFallHistory(user_id).enqueue(object :
+            server.getFallHistory(userID).enqueue(object :
                 Callback<HistoryResponse> {
                 override fun onFailure(call: Call<HistoryResponse>, t: Throwable) {
                     Log.e("Retrofit", "Error: ${t.message}")
@@ -86,7 +79,7 @@ class HistoryActivity: ComponentActivity() {
     }
 
     private fun requestSucceeded(arrayHistory: HistoryResponse?) {
-        if(arrayHistory == null) {
+        if(arrayHistory.isNullOrEmpty()) {
             textHistoryRecord.text = "최근 낙상 기록이 없습니다"
         } else {
             val lastRecentHistory = arrayHistory.last()
