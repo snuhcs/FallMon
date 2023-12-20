@@ -100,7 +100,7 @@ class FallDetectionService : Service() {
             val notificationChannel = NotificationChannel(
                 "ForegroundServiceChannel",
                 "Foreground Service Channel",
-                NotificationManager.IMPORTANCE_DEFAULT
+                NotificationManager.IMPORTANCE_NONE
             )
             val notificationManager = getSystemService(NotificationManager::class.java)
             notificationManager.createNotificationChannel(notificationChannel)
