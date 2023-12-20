@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
 import android.media.AudioAttributes
+import android.media.Ringtone
 import android.media.RingtoneManager
 import android.os.Bundle
 import android.os.CountDownTimer
@@ -42,6 +43,9 @@ class DetectedActivity : ComponentActivity() {
     private lateinit var userID: String
 
     private lateinit var fall: FallHistory
+
+
+    private lateinit var ringtone: Ringtone
 
     /**
      * put data sending was confirmed (and sended) to MainActivity & intent finish
@@ -145,15 +149,15 @@ class DetectedActivity : ComponentActivity() {
      */
     private fun alarm() {
         val isSoundOn = getOrSetSharedPreferences("User", "IS_SOUND_ON", true.toString()).toBoolean()
-        if(isSoundOn) {
-            val alarmSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
-            val audioAttributes = AudioAttributes.Builder()
-                .setUsage(AudioAttributes.USAGE_ALARM)
-                .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
-                .build()
+        val alarmSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
+        val audioAttributes = AudioAttributes.Builder()
+            .setUsage(AudioAttributes.USAGE_ALARM)
+            .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+            .build()
 
-            val ringtone = RingtoneManager.getRingtone(applicationContext, alarmSound)
-            ringtone.audioAttributes = audioAttributes
+        ringtone = RingtoneManager.getRingtone(applicationContext, alarmSound)
+        ringtone.audioAttributes = audioAttributes
+        if(isSoundOn) {
             ringtone.play()
         }
     }
@@ -183,6 +187,7 @@ class DetectedActivity : ComponentActivity() {
      * request server to put fall data
      */
     private fun request(fallHistory: FallHistory){
+        ringtone.stop()
         try{
             val createdStr = SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(fallHistory.createdAt)
             Log.d("request", "createdStr: ${createdStr}")
@@ -235,6 +240,7 @@ class DetectedActivity : ComponentActivity() {
         super.onDestroy()
         //fallDetectionService?.notifyActivityFinished()
         countDownTimer.cancel()
+        ringtone.stop()
         //unbindService(serviceConnection)
     }
 }

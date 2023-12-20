@@ -208,7 +208,16 @@ class FallDetectionService : Service() {
         /**
          * Create a notification to open DetectedActivity
          */
-        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        var notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val notificationChannel = NotificationChannel(
+                "ForegroundServiceChannel",
+                "Foreground Service Channel",
+                NotificationManager.IMPORTANCE_HIGH
+            )
+            notificationManager = getSystemService(NotificationManager::class.java)
+            notificationManager.createNotificationChannel(notificationChannel)
+        }
         val channelId = "FallDetectionChannelId"
 
         val intent = Intent(this, DetectedActivity::class.java)
