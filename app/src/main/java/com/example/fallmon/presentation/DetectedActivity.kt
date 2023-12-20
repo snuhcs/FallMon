@@ -149,15 +149,15 @@ class DetectedActivity : ComponentActivity() {
      */
     private fun alarm() {
         val isSoundOn = getOrSetSharedPreferences("User", "IS_SOUND_ON", true.toString()).toBoolean()
-        if(isSoundOn) {
-            val alarmSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
-            val audioAttributes = AudioAttributes.Builder()
-                .setUsage(AudioAttributes.USAGE_ALARM)
-                .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
-                .build()
+        val alarmSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
+        val audioAttributes = AudioAttributes.Builder()
+            .setUsage(AudioAttributes.USAGE_ALARM)
+            .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+            .build()
 
-            ringtone = RingtoneManager.getRingtone(applicationContext, alarmSound)
-            ringtone.audioAttributes = audioAttributes
+        ringtone = RingtoneManager.getRingtone(applicationContext, alarmSound)
+        ringtone.audioAttributes = audioAttributes
+        if(isSoundOn) {
             ringtone.play()
         }
     }
