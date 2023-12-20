@@ -28,7 +28,6 @@ class ConfirmedActivity: ComponentActivity() {
         setContentView(R.layout.activity_confirmed) // Set your layout here
 
         val confirmButton: ImageButton = findViewById(R.id.activity_confirmed_Confirm)
-        setContentView(R.layout.activity_detected) // Set your layout here
 
         countDown()
 
