@@ -10,7 +10,7 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 object RetrofitClient {
-    private val BaseURL: String = "http://34.22.106.16:8080"
+    private val BaseURL: String = "http://fallmon.sangmin7b.me:8080"
 
     val instance: Retrofit by lazy {
         Retrofit.Builder()

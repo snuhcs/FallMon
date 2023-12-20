@@ -2,6 +2,7 @@ package com.example.fallmon.presentation.retrofit
 
 import com.example.fallmon.presentation.retrofit.dto.FallHistoryDTO
 import com.example.fallmon.presentation.retrofit.dto.HistoryResponse
+import com.example.fallmon.presentation.retrofit.dto.UserDTO
 import retrofit2.Call
 import retrofit2.http.GET
 import retrofit2.http.POST
