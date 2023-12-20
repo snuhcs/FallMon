@@ -55,7 +55,17 @@ class DetectedActivity : ComponentActivity() {
         }
     }
 
-    //private var fallDetectionService: FallDetectionService? = null
+    private fun getOrSetSharedPreferences(preference:String, key: String, value: String): String{
+        val userPreferences = getSharedPreferences(preference, MODE_PRIVATE)
+        val prevVal = userPreferences.getString(key, "").toString()
+        // if value has already set in sharedPreferences, just return value
+        if (prevVal.isNotBlank()) return prevVal
+        // else set key to value passed by argument
+        val editor = userPreferences.edit()
+        editor.putString(key, value)
+        editor.apply()
+        return value
+    }
 
     /**
      * Set layout, buttons, views
@@ -134,15 +144,18 @@ class DetectedActivity : ComponentActivity() {
      * alarm even if the volume is 0 in watch setting.
      */
     private fun alarm() {
-        val alarmSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
-        val audioAttributes = AudioAttributes.Builder()
-            .setUsage(AudioAttributes.USAGE_ALARM)
-            .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
-            .build()
+        val isSoundOn = getOrSetSharedPreferences("User", "IS_SOUND_ON", true.toString()).toBoolean()
+        if(isSoundOn) {
+            val alarmSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
+            val audioAttributes = AudioAttributes.Builder()
+                .setUsage(AudioAttributes.USAGE_ALARM)
+                .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                .build()
 
-        val ringtone = RingtoneManager.getRingtone(applicationContext, alarmSound)
-        ringtone.audioAttributes = audioAttributes
-        ringtone.play()
+            val ringtone = RingtoneManager.getRingtone(applicationContext, alarmSound)
+            ringtone.audioAttributes = audioAttributes
+            ringtone.play()
+        }
     }
 
     /**

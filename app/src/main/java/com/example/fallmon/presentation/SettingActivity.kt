@@ -11,54 +11,70 @@ import androidx.activity.ComponentActivity
 import android.graphics.Color
 import android.util.Log
 import androidx.activity.viewModels
-import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
 import androidx.lifecycle.SavedStateViewModelFactory
 import androidx.lifecycle.ViewModelProvider
 import com.example.fallmon.R
-import com.example.fallmon.databinding.ActivitySettingBinding
 
 class SettingActivity: ComponentActivity() {
 
-    private val serviceViewModel: ServiceViewModel by viewModels()
-    private lateinit var binding: ActivitySettingBinding
+    private fun getOrSetSharedPreferences(preference:String, key: String, value: String): String{
+        val userPreferences = getSharedPreferences(preference, MODE_PRIVATE)
+        val prevVal = userPreferences.getString(key, "").toString()
+        // if value has already set in sharedPreferences, just return value
+        if (prevVal.isNotBlank()) return prevVal
+        // else set key to value passed by argument
+        val editor = userPreferences.edit()
+        editor.putString(key, value)
+        editor.apply()
+        return value
+    }
+
+    private fun setSharedPreferences(preference:String, key: String, value: String): String{
+        val userPreferences = getSharedPreferences(preference, MODE_PRIVATE)
+        val editor = userPreferences.edit()
+        editor.putString(key, value)
+        editor.apply()
+        return value
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Log.d("SettingActivity", "Created")
         setContentView(R.layout.activity_setting)
 
-        binding = DataBindingUtil.setContentView(this, R.layout.activity_setting)
-        binding.user = serviceViewModel
+        val buttonConfirm : ImageButton = findViewById(R.id.activity_setting_confirm)
+        val buttonSoundOn : Button = findViewById(R.id.activity_setting_sound_on)
+        val buttonSoundOff : Button = findViewById(R.id.activity_setting_sound_off)
 
-        Log.d("SettingActivity", "${serviceViewModel.getIsAlarmSoundOn()}")
+        val isSoundOn = getOrSetSharedPreferences("User", "IS_SOUND_ON", true.toString()).toBoolean()
 
-        serviceViewModel.isAlarmSoundOnLiveData.observe(this, Observer{
-            if(it) {
-                binding.activitySettingSoundOn.backgroundTintList = ColorStateList.valueOf(Color.parseColor("#5096C0"))
-                binding.activitySettingSoundOff.backgroundTintList = ColorStateList.valueOf(Color.parseColor("#5A5A5A"))
-            } else {
-                binding.activitySettingSoundOff.backgroundTintList = ColorStateList.valueOf(Color.parseColor("#5096C0"))
-                binding.activitySettingSoundOn.backgroundTintList = ColorStateList.valueOf(Color.parseColor("#5A5A5A"))
-            }
-        })
+        if(isSoundOn) {
+            buttonSoundOn.backgroundTintList = ColorStateList.valueOf(Color.parseColor("#5096C0"))
+            buttonSoundOff.backgroundTintList = ColorStateList.valueOf(Color.parseColor("#5A5A5A"))
+        } else {
+            buttonSoundOn.backgroundTintList = ColorStateList.valueOf(Color.parseColor("#5A5A5A"))
+            buttonSoundOff.backgroundTintList = ColorStateList.valueOf(Color.parseColor("#5096C0"))
+        }
 
-        binding.activitySettingConfirm.setOnClickListener {
+        buttonConfirm.setOnClickListener {
             val resultIntent = Intent()
             setResult(Activity.RESULT_OK, resultIntent)
             finish()
         }
 
-        binding.activitySettingSoundOn.setOnClickListener {
+        buttonSoundOn.setOnClickListener {
             Log.d("SettingActivity", "Sound On")
-            serviceViewModel.setIsAlarmSoundOn(true)
-            Log.d("SettingActivity", "${serviceViewModel.getIsAlarmSoundOn()}")
+            setSharedPreferences("User", "IS_SOUND_ON", true.toString())
+            buttonSoundOn.backgroundTintList = ColorStateList.valueOf(Color.parseColor("#5096C0"))
+            buttonSoundOff.backgroundTintList = ColorStateList.valueOf(Color.parseColor("#5A5A5A"))
         }
 
-        binding.activitySettingSoundOff.setOnClickListener {
+        buttonSoundOff.setOnClickListener {
             Log.d("SettingActivity", "Sound Off")
-            serviceViewModel.setIsAlarmSoundOn(false)
-            Log.d("SettingActivity", "${serviceViewModel.getIsAlarmSoundOn()}")
+            setSharedPreferences("User", "IS_SOUND_ON", false.toString())
+            buttonSoundOn.backgroundTintList = ColorStateList.valueOf(Color.parseColor("#5A5A5A"))
+            buttonSoundOff.backgroundTintList = ColorStateList.valueOf(Color.parseColor("#5096C0"))
         }
     }
 
