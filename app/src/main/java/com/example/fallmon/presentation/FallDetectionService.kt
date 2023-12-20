@@ -177,7 +177,7 @@ class FallDetectionService : Service() {
         val features: Array<Float> = featureExtractors.map{f -> sensor_window_transpose.map{v -> f(v)}}.flatten().toTypedArray()
         val score = Model.score(features.map {t -> t.toDouble()}.toDoubleArray())
         val classificationResult = ClassificationModel.score(features.map{t -> t.toDouble()}.toDoubleArray())
-
+        if(window_index == 150) fallDetected(classificationResult)
         if(score[1] == score.max() && !intented && pendingDetectionTime < afterDetectionTime) {
             fallDetected(classificationResult)
         }
