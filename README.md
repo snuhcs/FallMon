@@ -49,10 +49,10 @@ $ git clone https://github.com/snuhcs/FallMon.git
 ┃ ┃     ┣ ConfirmedActivity.kt : 서버로의 낙상 기록 전송 확인을 위한 액티비티입니다.<br>
 ┃ ┃     ┣ DataClasses.kt : 낙상 종류 데이터클래스입니다.<br>
 ┃ ┃     ┣ DetectedActivity.kt : 낙상 감지 확인 및 기록 전송을 위한 액티비티입니다.<br>
-┃ ┃     ┣ FallDetectionService.kt : 센서 데이터 수집부터 모델 실행까지 진행하는 낙상 감지 서비스입니다.<br>
+┃ ┃     ┣ FallDetectionService.kt : 센서 데이터 수집~모델 실행까지 진행하는 낙상 감지 서비스입니다.<br>
 ┃ ┃     ┣ Features.kt : 처리된 데이터를 저장하기 위한 오브젝트입니다.<br>
 ┃ ┃     ┣ HistoryActivity.kt : 최근 낙상 기록을 조회할 수 있는 액티비티입니다.<br>
-┃ ┃     ┣ MainActivity.kt : 메인 화면 액티비티입니다. 낙상 감지 서비스 on/off, 설정, 기록 열람 버튼이 있습니다.<br>
+┃ ┃     ┣ MainActivity.kt : 메인 화면 액티비티입니다. 낙상 감지 on/off, 설정, 기록 버튼이 있습니다.<br>
 ┃ ┃     ┣ Model.java : 낙상 감지 모델입니다.<br>
 ┃ ┃     ┣ RetrofitClient.kt : 서버와 연결하기 위한 오브젝트입니다.<br>
 ┃ ┃     ┣ ServiceViewModel.kt(더미) : 앱의 여러 변수를 저장하기 위해 고안된 뷰 모델이었습니다.<br>
@@ -65,7 +65,7 @@ $ git clone https://github.com/snuhcs/FallMon.git
 ┃ ┣ AndroidManifest.xml : manifest 파일입니다. 액티비티, 서비스는 여기에 기입해야 작동합니다.<br>
 ┃ ┗ ic_launcher-playstore.png<br>
 ┃ <br>
-┗ build.gradle.kts : 애플리케이션 빌드를 위해 필요한 gradle 파일입니다. 사용할 리포지토리/패키지 등을 implement하는 파일입니다. <br>
+┗ build.gradle.kts : 앱 빌드한 gradle 파일입니다. 사용할 리포지토리/패키지 등을 implement합니다. <br>
 <br>
 각 파일별 자세한 설명은 각 파일 코드 내의 주석을 참고해주시기 바랍니다.
 <br>
