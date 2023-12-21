@@ -40,7 +40,7 @@ $ git clone https://github.com/snuhcs/FallMon.git
 ┃ ┃     ┃┗ FallMonMath.kt : 센서데이터를 전처리하기 위한 함수를 모아둔 오브젝트입니다.<br>
 ┃ ┃     ┃<br>
 ┃ ┃     ┣ **retrofit**<br>
-┃ ┃     ┃┣ **dto** : 서버와 통신을 위해 Json 형식의 데이터를 Kotlin으로 변환하기 위한 데이터클래스 폴더입니다.<br>
+┃ ┃     ┃┣ **dto** : 서버와 통신을 위해 Json 형식을 Kotlin으로 변환하기 위한 데이터클래스 폴더입니다.<br>
 ┃ ┃     ┃┗ FallMonService.kt : 서버에 POST/GET을 요청하는 데에 사용되는 함수의 인터페이스입니다.<br>
 ┃ ┃     ┃<br>
 ┃ ┃     ┣ **theme** : 애플리케이션의 theme을 저장한 폴더입니다. 기본값 그대로인 상태입니다.<br>
@@ -49,20 +49,20 @@ $ git clone https://github.com/snuhcs/FallMon.git
 ┃ ┃     ┣ ConfirmedActivity.kt : 서버로의 낙상 기록 전송 확인을 위한 액티비티입니다.<br>
 ┃ ┃     ┣ DataClasses.kt : 낙상 종류 데이터클래스입니다.<br>
 ┃ ┃     ┣ DetectedActivity.kt : 낙상 감지 확인 및 기록 전송을 위한 액티비티입니다.<br>
-┃ ┃     ┣ FallDetectionService.kt : 낙상 감지 포어그라운드 서비스입니다. 센서 데이터 수집부터 모델 실행까지 진행합니다.<br>
+┃ ┃     ┣ FallDetectionService.kt : 센서 데이터 수집부터 모델 실행까지 진행하는 낙상 감지 서비스입니다.<br>
 ┃ ┃     ┣ Features.kt : 처리된 데이터를 저장하기 위한 오브젝트입니다.<br>
 ┃ ┃     ┣ HistoryActivity.kt : 최근 낙상 기록을 조회할 수 있는 액티비티입니다.<br>
-┃ ┃     ┣ MainActivity.kt : 메인 화면 액티비티입니다. 낙상 감지 서비스 켜고 끄기, 최근 기록 조회, 설정 액티비티로 이동 가능합니다.<br>
+┃ ┃     ┣ MainActivity.kt : 메인 화면 액티비티입니다. 낙상 감지 서비스 on/off, 설정, 기록 열람 버튼이 있습니다.<br>
 ┃ ┃     ┣ Model.java : 낙상 감지 모델입니다.<br>
 ┃ ┃     ┣ RetrofitClient.kt : 서버와 연결하기 위한 오브젝트입니다.<br>
-┃ ┃     ┣ ServiceViewModel.kt(더미) : 애플리케이션의 여러 변수를 저장하기 위해 고안된 뷰 모델이었습니다.<br>
+┃ ┃     ┣ ServiceViewModel.kt(더미) : 앱의 여러 변수를 저장하기 위해 고안된 뷰 모델이었습니다.<br>
 ┃ ┃     ┗ SettingActivity.kt : 애플리케이션의 설정을 변경하기 위한 액티비티입니다.<br>
 ┃ ┣ **res**<br>
 ┃ ┃ ┣ **layout** : 액티비티의 레이아웃 xml 파일을 저장해둔 폴더입니다.<br>
 ┃ ┃ ┣ **mipmap-...** : 애플리케이션 아이콘을 저장해둔 폴더입니다.<br>
 ┃ ┃ ┗ **drawable-...** : 이미지버튼의 백터 이미지 파일을 저장해둔 폴더입니다.<br>
 ┃ ┃<br>
-┃ ┣ AndroidManifest.xml : 애플리케이션 manifest 파일입니다. 각 액티비티, 서비스는 여기에 형식에 맞게 기입해야 작동합니다.<br>
+┃ ┣ AndroidManifest.xml : manifest 파일입니다. 액티비티, 서비스는 여기에 기입해야 작동합니다.<br>
 ┃ ┗ ic_launcher-playstore.png<br>
 ┃ <br>
 ┗ build.gradle.kts : 애플리케이션 빌드를 위해 필요한 gradle 파일입니다. 사용할 리포지토리/패키지 등을 implement하는 파일입니다. <br>
