@@ -166,9 +166,10 @@ class FallDetectionService : Service() {
         }
         sensor_window_transpose = Array(3, {Array<Float>(WINDOW_SIZE, {0.0f})})
 
+        val index = window_index
         for(i: Int in 0 until 3)
             for(j: Int in 0 until WINDOW_SIZE)
-                sensor_window_transpose[i][j] = sensor_window[j][i]
+                sensor_window_transpose[i][j] = sensor_window[(j+index)%75][i]
 
         val featureExtractors :Array<FeatureExtractor> = arrayOf(Feature.average, Feature.standardDeviation,
             Feature.rootMinSquare, Feature.maxAmplitude, Feature.minAmplitude, Feature.median, Feature.nzc, Feature.skewness, Feature.kurtosis, Feature.percentile1,
