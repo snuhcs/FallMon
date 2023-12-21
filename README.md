@@ -13,13 +13,18 @@ application_base가 디폴트 브랜치입니다.
 - **porter**: Python 머신러닝 모델을 Java/C로 변환해주는 포팅툴을 담은 폴더입니다.
 - **FallMon-debug.apk**: FallMon 애플리케이션을 쉽게 설치하기 위해 빌드된 apk 파일(debug)입니다. 설치하려는 기기에 옮긴 후, apk 파일을 실행하여 설치해주시면 됩니다.
 - **기타 파일**: 직접 수정할 필요없는 파일들입니다.
-
+- **(Submodule)FallMonServer**: FallMon Server 리포지토리입니다. 
 <br>
 
 ## 리포지토리 클론
 
 ```bash
 $ git clone https://github.com/snuhcs/FallMon.git
+```
+
+## 서브모듈도 함께 클론
+```bash
+git clone --recurse-submodules https://github.com/snuhcs/FallMon.git
 ```
 
 <br>
@@ -65,6 +70,7 @@ $ git clone https://github.com/snuhcs/FallMon.git
 ┃ ┗ ic_launcher-playstore.png<br>
 ┃ <br>
 ┗ build.gradle.kts : 앱 빌드한 gradle 파일입니다. 사용할 리포지토리/패키지 등을 implement합니다. <br>
+┗ FallMonServer : 서버 서브모듈이 들어있는 폴더입니다. 자세한 사항은 서버 리포의 를 확인하시기 바랍니다.<br>
 <br>
 각 파일별 자세한 설명은 각 파일 코드 내의 주석을 참고해주시기 바랍니다.
 <br>
