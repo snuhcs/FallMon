@@ -137,11 +137,6 @@ class FallDetectionService : Service() {
                 sensor_window[window_index % WINDOW_SIZE][1] = yAcceleration
                 sensor_window[window_index % WINDOW_SIZE][2] = zAcceleration
 
-                // for easy calculate features. Erase this if has efficient way
-                sensor_window_transpose[0][window_index % WINDOW_SIZE] = xAcceleration
-                sensor_window_transpose[1][window_index % WINDOW_SIZE] = yAcceleration
-                sensor_window_transpose[2][window_index % WINDOW_SIZE] = zAcceleration
-
                 window_index += 1
                 afterDetectionTime += 1
 
