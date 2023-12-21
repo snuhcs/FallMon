@@ -121,6 +121,7 @@ class FallDetectionService : Service() {
             .setContentText("Running...")
             .setSmallIcon(R.drawable.ic_alarm)
             .setContentIntent(pendingIntent)
+            .setPriority(NotificationCompat.PRIORITY_MIN)
             .build()
 
         // Start foreground service with notification
