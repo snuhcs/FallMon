@@ -95,7 +95,7 @@ Android Studio를 재시작해주시면 대부분의 상황에서 IDE가 app을 
 
 <br>
 
-## Application User Manual
+## User Manual
 
 ### Application
 ![image](https://github.com/snuhcs/FallMon/assets/39697564/edb1f888-10f6-469b-a836-7c2eaa5faf9b)
