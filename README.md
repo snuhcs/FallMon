@@ -55,7 +55,6 @@ $ git clone https://github.com/snuhcs/FallMon.git
 ┃ ┃     ┣ MainActivity.kt : 메인 화면 액티비티입니다. 낙상 감지 on/off, 설정, 기록 버튼이 있습니다.<br>
 ┃ ┃     ┣ Model.java : 낙상 감지 모델입니다.<br>
 ┃ ┃     ┣ RetrofitClient.kt : 서버와 연결하기 위한 오브젝트입니다.<br>
-┃ ┃     ┣ ServiceViewModel.kt(더미) : 앱의 여러 변수를 저장하기 위해 고안된 뷰 모델이었습니다.<br>
 ┃ ┃     ┗ SettingActivity.kt : 애플리케이션의 설정을 변경하기 위한 액티비티입니다.<br>
 ┃ ┣ **res**<br>
 ┃ ┃ ┣ **layout** : 액티비티의 레이아웃 xml 파일을 저장해둔 폴더입니다.<br>
