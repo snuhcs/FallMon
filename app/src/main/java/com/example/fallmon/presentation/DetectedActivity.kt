@@ -44,11 +44,13 @@ class DetectedActivity : ComponentActivity() {
 
     private lateinit var fall: FallHistory
 
-
+    /**
+     * Ringtone for notitification
+     */
     private lateinit var ringtone: Ringtone
 
     /**
-     * put data sending was confirmed (and sended) to MainActivity & intent finish
+     * put data sending was confirmed to FallDetectionService & intent finish
      */
     private val getActivityResult = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
         if(it.resultCode == RESULT_OK) {
@@ -59,6 +61,16 @@ class DetectedActivity : ComponentActivity() {
         }
     }
 
+    /**
+     * For sending FallDetectionService that intent is finished
+     */
+    private var fallDetectionService: FallDetectionService? = null
+
+    /**
+     * Get or Init shared preference data
+     * To get ringtone sound is on/off from user setting
+     * If not initialized, sound is on
+     */
     private fun getOrSetSharedPreferences(preference:String, key: String, value: String): String{
         val userPreferences = getSharedPreferences(preference, MODE_PRIVATE)
         val prevVal = userPreferences.getString(key, "").toString()
@@ -82,8 +94,8 @@ class DetectedActivity : ComponentActivity() {
         retrofit = RetrofitClient.instance
         userID = getSharedPreferences("User", MODE_PRIVATE)?.getString("ID", "").toString()
 
-        //val serviceIntent = Intent(this, FallDetectionService::class.java)
-        //bindService(serviceIntent, serviceConnection, Context.BIND_AUTO_CREATE)
+        val serviceIntent = Intent(this, FallDetectionService::class.java)
+        bindService(serviceIntent, serviceConnection, Context.BIND_AUTO_CREATE)
 
         val confirmButton: ImageButton = findViewById(R.id.activity_detected_Confirm)
         val disconfirmButton: ImageButton = findViewById(R.id.activity_detected_Disconfirm)
@@ -129,7 +141,10 @@ class DetectedActivity : ComponentActivity() {
             finish()
         }
     }
-/*
+
+    /**
+     * bind DetectedActivity with FallDetectionService
+     */
     private val serviceConnection = object : ServiceConnection {
         override fun onServiceConnected(className: ComponentName?, service: IBinder?) {
             val binder = service as FallDetectionService.LocalBinder
@@ -142,7 +157,6 @@ class DetectedActivity : ComponentActivity() {
         }
     }
 
- */
 
     /**
      * alarm even if the volume is 0 in watch setting.
@@ -238,9 +252,9 @@ class DetectedActivity : ComponentActivity() {
     override fun onDestroy() {
         Log.d("DetectedActivity", "Destroyed")
         super.onDestroy()
-        //fallDetectionService?.notifyActivityFinished()
+        fallDetectionService?.notifyActivityFinished()
         countDownTimer.cancel()
         ringtone.stop()
-        //unbindService(serviceConnection)
+        unbindService(serviceConnection)
     }
 }

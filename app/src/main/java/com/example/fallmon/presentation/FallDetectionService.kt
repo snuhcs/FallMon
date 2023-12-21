@@ -39,10 +39,11 @@ class FallDetectionService : Service() {
     private var window_index: Int = 0
 
     /**
+     * To avoid redundant fall detection
      * var, listener, binder for intent DetectedActivity & receiving isFinished
      */
     private var intented: Boolean = false
-    private val pendingDetectionTime: Int = 300  //  seconds = value / 30 Hz
+    private val pendingDetectionTime: Int = 300  // (10 seconds) seconds = value / 30 Hz
     private var afterDetectionTime: Int = pendingDetectionTime
     private var activityResultListener: ActivityResultListener? = null
     fun setActivityResultListener(listener: ActivityResultListener) {
@@ -90,6 +91,11 @@ class FallDetectionService : Service() {
         )
     }
 
+
+    /**
+     * Notification for OS not to be destroy Foreground Service.
+     * Importance none -> Will not be displayed.
+     */
     private fun notification() {
         /*
          * run this code for maintain application to be run continuously
@@ -188,13 +194,12 @@ class FallDetectionService : Service() {
             |""".trimMargin()
 
          */
-
-
     }
 
     /**
      * Service calls this function when fall is detected even if background.
-     * Popping up DetectedActivity, and alarm.
+     * Popping up notification, and this will lead to DetectedActivity, and alarm.
+     * Importance High -> Will be displayed on with alarm.
      */
     private fun fallDetected(classificationResult: DoubleArray) {
 
@@ -237,7 +242,7 @@ class FallDetectionService : Service() {
 
         notificationManager.notify(1, notification)
 
-        // Call DetectedActivity
+        // Intent DetectedActivity
         startActivity(intent)
     }
 
@@ -269,6 +274,10 @@ class FallDetectionService : Service() {
         intented = true
     }
 
+    /**
+     * This function is called in MainActivity.
+     * Remove the foreground service
+     */
     fun stopService() {
         Log.d("FallDetectionService", "Stopping Service...")
         try {

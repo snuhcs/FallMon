@@ -18,6 +18,11 @@ import com.example.fallmon.R
 
 class SettingActivity: ComponentActivity() {
 
+    /**
+     * Get or Init shared preference data
+     * To get Application Setting from user setting
+     * If not initialized, init by case
+     */
     private fun getOrSetSharedPreferences(preference:String, key: String, value: String): String{
         val userPreferences = getSharedPreferences(preference, MODE_PRIVATE)
         val prevVal = userPreferences.getString(key, "").toString()
@@ -30,6 +35,10 @@ class SettingActivity: ComponentActivity() {
         return value
     }
 
+    /**
+     * To change Application Setting
+     * Save right away after change
+     */
     private fun setSharedPreferences(preference:String, key: String, value: String): String{
         val userPreferences = getSharedPreferences(preference, MODE_PRIVATE)
         val editor = userPreferences.edit()
@@ -38,6 +47,10 @@ class SettingActivity: ComponentActivity() {
         return value
     }
 
+    /**
+     * Most of the code in this function is UI setting.
+     * Color of button - #5096C0 : On, #5A5A5A : Off
+     */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Log.d("SettingActivity", "Created")

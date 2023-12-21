@@ -38,6 +38,9 @@ class ConfirmedActivity: ComponentActivity() {
         }
     }
 
+    /**
+     * Show to user 5 seconds that data is sent to server
+     */
     private fun countDown() {
         val timerText: TextView = findViewById(R.id.activity_detected_TimerText)
         countDownTimer = object : CountDownTimer(totalTimeInMillis, 1000) {

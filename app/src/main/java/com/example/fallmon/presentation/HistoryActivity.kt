@@ -20,6 +20,9 @@ import java.text.SimpleDateFormat
 
 class HistoryActivity: ComponentActivity() {
 
+    /**
+     * recent history will displayed in this TextView
+     */
     private lateinit var textHistoryRecord : TextView
 
     /**
@@ -45,7 +48,7 @@ class HistoryActivity: ComponentActivity() {
     }
 
     /**
-     * request server to put fall data
+     * request server to give the fall data of this User ID.
      */
     private fun request(userID: String){
         try{
@@ -78,6 +81,9 @@ class HistoryActivity: ComponentActivity() {
 
     }
 
+    /**
+     * Display the most recent fall data.
+     */
     private fun requestSucceeded(arrayHistory: HistoryResponse?) {
         if(arrayHistory.isNullOrEmpty()) {
             textHistoryRecord.text = "최근 낙상 기록이 없습니다"

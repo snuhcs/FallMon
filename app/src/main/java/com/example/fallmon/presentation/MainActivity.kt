@@ -33,27 +33,18 @@ interface ActivityResultListener {
 
 class MainActivity : ComponentActivity(), ActivityResultListener {
 
-    /**
-     * intented : check if intented DetectedActivity
-     * getActivityResult : to get result from DetectedActivity
-     */
-    /*
-    private var intented: Boolean = false
-    private val getActivityResult = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-        if(it.resultCode == RESULT_OK) {
-            val confirmed = it.data?.getBooleanExtra("confirmed", false)
-            intented = false
-        }
-    }
-
-     */
 
     /**
      * Check if service is running
      */
-
     private var fallDetectionService : FallDetectionService? = null
+    private var isRunning: Boolean = false
 
+    /**
+     * Get or Init shared preference data
+     * To get User ID/PW
+     * If not initialized, randomly init.
+     */
     private fun getOrSetSharedPreferences(preference:String, key: String, value: String): String{
         val userPreferences = getSharedPreferences(preference, MODE_PRIVATE)
         val prevVal = userPreferences.getString(key, "").toString()
@@ -66,7 +57,7 @@ class MainActivity : ComponentActivity(), ActivityResultListener {
         return value
     }
 
-    /*
+    /**
      *  initialize local user ID and PW
      */
     private fun setupLocalUser(){
@@ -74,9 +65,8 @@ class MainActivity : ComponentActivity(), ActivityResultListener {
         val userPW: String = getOrSetSharedPreferences("User", "PW", UUID.randomUUID().toString())
     }
 
-    /*
+    /**
      * initialize remote user (server) ID and PW
-     *
      */
     private fun setupRemoteUser(){
         val preferences = getSharedPreferences("User", MODE_PRIVATE)
@@ -93,6 +83,11 @@ class MainActivity : ComponentActivity(), ActivityResultListener {
     private  fun requestFailed(){
         Log.d("Main", "User creation failed")
     }
+
+    /**
+     * Request server to create User by ID & PW
+     * Nothing will be changed when already exists.
+     */
     private fun request(userID: String, userPW: String){
         try{
             val retrofit = RetrofitClient.instance
@@ -121,26 +116,6 @@ class MainActivity : ComponentActivity(), ActivityResultListener {
             requestFailed()
         }
     }
-
-    /*
-    private var isBound = false
-
-    private val connection = object : ServiceConnection {
-        override fun onServiceConnected(className: ComponentName, service: IBinder) {
-            val binder = service as FallDetectionService.LocalBinder
-            fallDetectionService = binder.getService()
-            isBound = true
-        }
-
-        override fun onServiceDisconnected(arg0: ComponentName) {
-            //fallDetectionService = null
-            isBound = false
-        }
-    }
-
-     */
-
-    private var isRunning: Boolean = false
 
     /**
      * Constructor
@@ -190,6 +165,9 @@ class MainActivity : ComponentActivity(), ActivityResultListener {
 
     }
 
+    /**
+     * Run / Stop Activities or Service
+     */
     private fun runHistoryActivity() {
         val intent = Intent(this, HistoryActivity::class.java)
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)

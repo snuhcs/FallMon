@@ -9,7 +9,9 @@ import kotlin.math.pow
 import kotlin.math.sqrt
 
 
-
+/**
+ * functions for pre-process sensor data
+ */
 object FallMonMath {
     fun standardDeviation(array: Array<Float>, average: Float): Float {
         var variance = 0.0f
@@ -40,13 +42,19 @@ object FallMonMath {
         return sortedArray[array.size / 2]
     }
 
-    // Simplified assume that WINDOW_SIZE = 75
+    /**
+     * Simplified assume that WINDOW_SIZE = 75
+     * 1분위 값
+     */
     fun percentile1(array: Array<Float>): Float {
         val sortedArray = array.sorted()
         return (sortedArray[18] + sortedArray[19]) / 2
     }
 
-    // Simplified assume that WINDOW_SIZE = 75
+    /**
+     * Simplified assume that WINDOW_SIZE = 75
+     * 3분위 값
+     */
     fun percentile3(array: Array<Float>): Float {
         val sortedArray = array.sorted()
         return (sortedArray[55] + sortedArray[56]) / 2
@@ -77,6 +85,9 @@ object FallMonMath {
         return skewness.toFloat()
     }
 
+    /**
+     * Same fft function to python's fft
+     */
     fun fft(input: DoubleArray): DoubleArray {
         val fft = DoubleFFT_1D(input.size.toLong() * 2)
 
